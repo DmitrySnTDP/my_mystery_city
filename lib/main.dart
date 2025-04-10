@@ -1,7 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:yandex_maps_mapkit/init.dart' as init;
+import 'map.dart';
+import '_mapkit_key.dart';
 
-void main() {
-  runApp(const MyApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  init.initMapkit(
+    apiKey: mapkitApiKey,
+    locale: "ru_RU"
+  );
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -37,7 +46,7 @@ class _MyHomePageState extends State<MyHomePage> {
     Widget page = Placeholder();
     switch (selectedIndex) {
       case 0:
-        page = Placeholder(color: Colors.white,);
+        page = MapPage();
         break;
       case 1:
         page = Placeholder(color: Colors.red,);
