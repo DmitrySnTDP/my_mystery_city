@@ -21,9 +21,11 @@ class _MapPageState extends State<MapPage> {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        body: YandexMap(onMapCreated: (mapWindow) {
-          _mapWindow = mapWindow;
-          mapkit.onStart();
+        body: YandexMap(
+          onMapCreated: (mapWindow)
+          {
+            _mapWindow = mapWindow;
+            mapkit.onStart();
           }
         )
       )

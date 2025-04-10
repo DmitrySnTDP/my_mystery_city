@@ -1,1 +1,1 @@
-final mapkitApiKey = String.fromEnvironment('YOUR_API_KEY');
+final mapkitApiKey = "YOUR_API_KEY";
