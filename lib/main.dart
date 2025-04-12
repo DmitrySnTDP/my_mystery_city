@@ -90,7 +90,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   label: 'Настройки',
                 ),
                 NavigationDestination(
-                  icon: Icon(Icons.home),
+                  icon: Icon(Icons.account_circle),
                   label: 'Профиль',
                 ),
               ],
