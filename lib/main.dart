@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:yandex_maps_mapkit/init.dart' as init;
-import 'package:yandex_maps_mapkit/mapkit.dart';
-import 'package:yandex_maps_mapkit/mapkit_factory.dart';
+// import 'package:yandex_maps_mapkit/mapkit.dart';
+// import 'package:yandex_maps_mapkit/mapkit_factory.dart';
 import 'map.dart';
 import '_mapkit_key.dart';
 
