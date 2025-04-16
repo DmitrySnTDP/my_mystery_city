@@ -3,6 +3,7 @@ import 'package:yandex_maps_mapkit/init.dart' as init;
 import 'map.dart';
 import '_mapkit_key.dart';
 
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -39,6 +40,18 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   var selectedIndex = 0;
+  final colorOnClick = Color.fromRGBO(246, 135, 99, 1);
+  // final gradientColor = ShaderMask(
+  // shaderCallback: (Rect bounds) {
+  //   return LinearGradient(
+  //     colors: [Color.fromRGBO(247, 108, 108, 1), Color.fromRGBO(244, 162, 89, 1)],
+  //     begin: Alignment.centerLeft,
+  //     end: Alignment.centerRight,
+  //     ).createShader(bounds);
+  //   },
+  //   child: Icon(Icons.settings),
+  // );
+
 
   @override
   Widget build(BuildContext context){
@@ -76,21 +89,25 @@ class _MyHomePageState extends State<MyHomePage> {
                   });
                 },
               selectedIndex: selectedIndex,
-              destinations: const <Widget>[
+              destinations: <Widget>[
                 NavigationDestination(
-                  icon: Icon(Icons.map),
+                  selectedIcon: ImageIcon(const AssetImage("assets/icons/map.png"), color: colorOnClick),
+                  icon: const ImageIcon(AssetImage('assets/icons/map.png')),
                   label: 'Карта',
                 ),
                 NavigationDestination(
-                  icon: Icon(Icons.book),
-                  label: 'Справочник',
+                  selectedIcon: ImageIcon(const AssetImage("assets/icons/routes.png"), color: colorOnClick),
+                  icon: const ImageIcon(AssetImage('assets/icons/routes.png')),
+                  label: 'Маршруты',
                 ),
                 NavigationDestination(
-                  icon: Icon(Icons.settings),
-                  label: 'Настройки',
+                  selectedIcon: ImageIcon(const AssetImage("assets/icons/achievements.png"), color: colorOnClick),
+                  icon: const ImageIcon(AssetImage('assets/icons/achievements.png')),
+                  label: 'Достижения',
                 ),
                 NavigationDestination(
-                  icon: Icon(Icons.account_circle),
+                  selectedIcon: ImageIcon(const AssetImage("assets/icons/profile.png"), color: colorOnClick),
+                  icon: const ImageIcon(AssetImage('assets/icons/profile.png')),
                   label: 'Профиль',
                 ),
               ],

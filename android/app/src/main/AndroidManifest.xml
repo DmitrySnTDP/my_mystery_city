@@ -4,7 +4,7 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" /> -->
 
     <application
-        android:label="my_mystery_city"
+        android:label="My mystery city"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
