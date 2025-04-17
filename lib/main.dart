@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:yandex_maps_mapkit/init.dart' as init;
-// import 'package:yandex_maps_mapkit/mapkit.dart';
-// import 'package:yandex_maps_mapkit/mapkit_factory.dart';
 import 'map.dart';
 import '_mapkit_key.dart';
 
@@ -23,9 +21,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'My mystery city',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Color.fromRGBO(244, 147, 94, 1)),
-      ),
+      theme: ThemeData(colorSchemeSeed: Colors.white),
       home: const MyHomePage(title: 'My Mystery City'),
     );
   }
@@ -90,6 +86,19 @@ class _MyHomePageState extends State<MyHomePage> {
                   selectedIndex = index;
                   });
                 },
+              
+              indicatorColor: Color.from(alpha: 0, red: 255, green: 255, blue: 255),
+              labelTextStyle: WidgetStateProperty.resolveWith((states) {
+                return TextStyle(
+                  fontSize: 12,
+                  fontWeight: states.contains(WidgetState.selected)
+                      ? FontWeight.bold
+                      : FontWeight.normal,
+                  color: states.contains(WidgetState.selected)
+                      ? Color.fromRGBO(246, 135, 99, 1)
+                      : Color.fromRGBO(51, 51, 51, 1),
+                );
+              }),
               selectedIndex: selectedIndex,
               destinations: <Widget>[
                 NavigationDestination(
@@ -106,6 +115,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   selectedIcon: ImageIcon(const AssetImage("assets/icons/achievements.png"), color: colorOnClick),
                   icon: const ImageIcon(AssetImage('assets/icons/achievements.png')),
                   label: 'Достижения',
+                  
                 ),
                 NavigationDestination(
                   selectedIcon: ImageIcon(const AssetImage("assets/icons/profile.png"), color: colorOnClick),
