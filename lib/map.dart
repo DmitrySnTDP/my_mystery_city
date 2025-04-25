@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:yandex_maps_mapkit/mapkit.dart';
 import 'package:yandex_maps_mapkit/mapkit_factory.dart';
 import 'package:yandex_maps_mapkit/image.dart' as image_provider;
@@ -17,7 +18,6 @@ final monumentMarker =  image_provider.ImageProvider.fromImageProvider(const Ass
 final intrestPlaceMarker = image_provider.ImageProvider.fromImageProvider(const AssetImage("assets/images/intresting_place_marker.png")); // 2
 final startRouteMarker = image_provider.ImageProvider.fromImageProvider(const AssetImage("assets/images/start_route_marker.png"));
 
-
 Future<Position?> determinePosition() async {
   if (await Permission.location.request().isGranted) {
     return await Geolocator.getCurrentPosition();
@@ -25,6 +25,9 @@ Future<Position?> determinePosition() async {
   return null;
 }
 
+Future<String> _readJsonFile(String filePath)  {
+  return rootBundle.loadString(filePath);
+}
 
 // final class MapObjectTapListenerImpl implements MapObjectTapListener {
 
@@ -97,6 +100,7 @@ class _MapPageState extends State<MapPage> {
           onMapCreated: (mapWindow) async
           {
             mapWindow_ = mapWindow;
+            mapWindow.map.setMapStyle(await _readJsonFile("assets/style/style_map.json"));
             await _makePoints();
             await _moveToUserLocation();
             mapkit.onStart();

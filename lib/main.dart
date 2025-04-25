@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:yandex_maps_mapkit/init.dart' as init;
 import 'map.dart';
+import 'db_worker.dart';
 import '_mapkit_key.dart';
 
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
+  checkDB();
   init.initMapkit(
     apiKey: mapkitApiKey,
     locale: "ru_RU"
