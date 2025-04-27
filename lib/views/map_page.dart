@@ -4,10 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:my_mystery_city/controllers/map_state.dart';
 import 'package:my_mystery_city/data/reader_json.dart';
 
-import 'package:yandex_maps_mapkit/mapkit.dart';
+import 'package:yandex_maps_mapkit/mapkit.dart' hide LocationSettings;
 import 'package:yandex_maps_mapkit/mapkit_factory.dart';
 import 'package:yandex_maps_mapkit/yandex_map.dart';
 
+import 'package:geolocator/geolocator.dart';
+import 'dart:async';
+
+late StreamSubscription<Position> _positionStream;
 
 MapWindow? mapWindow_;
 
@@ -20,6 +24,36 @@ class MapPage extends StatefulWidget {
 
 class _MapPageState extends State<MapPage> {
   var defaultPoint = Point(latitude: 56.837716, longitude: 60.596828); // убрать с костылём зума на екб
+
+  // Обновление метки пользователя
+  @override
+  void initState() {
+  super.initState();
+
+  _positionStream = Geolocator.getPositionStream(
+    locationSettings: const LocationSettings(
+      accuracy: LocationAccuracy.high,
+      distanceFilter: 0,
+    ),
+  ).listen((Position position) {
+    final userPoint = Point(
+      latitude: position.latitude,
+      longitude: position.longitude,
+    );
+
+    if (userLocationPlacemark != null) {
+      setState(() {
+        userLocationPlacemark!.geometry = userPoint;
+      });
+    }
+  });
+}
+
+@override
+void dispose() {
+  _positionStream.cancel(); // Остановить поток при закрытии виджета
+  super.dispose();
+}
 
   @override
   Widget build(BuildContext context) {
