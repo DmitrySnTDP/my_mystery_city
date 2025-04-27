@@ -1,5 +1,7 @@
+import 'package:my_mystery_city/get_points_data.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
+// import 'package:yandex_maps_mapkit/search.dart';
 
 Database? database;
 
@@ -7,6 +9,10 @@ Future<List<MarkerMap>> getData() async {
   database = await openDatabase(join(await getDatabasesPath(), "assets/db/db_local.db"));
   var data = getMarkersMap();
   return data;
+}
+// final listener = SearchSuggestSessionSuggestListener;
+Future<void> get() async {
+  await searchMonuments();
 }
 
 class MarkerMap {

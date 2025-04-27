@@ -29,18 +29,6 @@ Future<String> _readJsonFile(String filePath)  {
   return rootBundle.loadString(filePath);
 }
 
-// final class MapObjectTapListenerImpl implements MapObjectTapListener {
-
-//   @override
-//   bool onMapObjectTap(MapObject mapObject, Point point) {
-//     showSnackBar("Tapped the placemark: Point(latitude: ${point.latitude}, longitude: ${point.longitude})");
-//     return true;
-//   }
-// }
-
-// final listener = MapObjectTapListenerImpl();
-// placemark.addTapListener(listener);
-
 class MapPage extends StatefulWidget {
   const MapPage({super.key});
   @override
@@ -48,6 +36,7 @@ class MapPage extends StatefulWidget {
 }
 
 class _MapPageState extends State<MapPage> {
+
   Future<void> _makePoints() async {
     var markerCollections =  mapWindow_!.map.mapObjects.addCollection();
     final dbData = await getData();
