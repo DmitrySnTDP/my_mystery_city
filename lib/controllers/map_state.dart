@@ -1,18 +1,23 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart' as fl_material;
 import 'package:geolocator/geolocator.dart';
+import 'package:my_mystery_city/views/map_page.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import 'package:my_mystery_city/data/db_worker.dart';
 import 'package:my_mystery_city/listeners/map_object_tap_listener.dart';
 import 'package:my_mystery_city/listeners/cluster_listener.dart';
 
-import 'package:yandex_maps_mapkit/mapkit.dart';
+import 'package:yandex_maps_mapkit/mapkit.dart' hide LocationSettings;
 import 'package:yandex_maps_mapkit/image.dart' as image_provider;
+import 'package:yandex_maps_mapkit/yandex_map.dart';
 
 
 Position? lastPosition;
 Position? userPosition;
 PlacemarkMapObject? placemark;
+PlacemarkMapObject? userLocationPlacemark;
 MapObjectCollection? mapObjectCollection;
 final tabMarkerListener = MapObjectTapListenerImpl();
 final clusterListener = ClusterListenerImpl();
@@ -22,30 +27,61 @@ final monumentMarker =  image_provider.ImageProvider.fromImageProvider(const fl_
 final intrestPlaceMarker = image_provider.ImageProvider.fromImageProvider(const fl_material.AssetImage("assets/images/intresting_place_marker.png")); // 2
 final startRouteMarker = image_provider.ImageProvider.fromImageProvider(const fl_material.AssetImage("assets/images/start_route_marker.png"));
 
+Future<Position> _determinePosition() async {
+  bool serviceEnabled;
+  LocationPermission permission;
 
-Future<Position?> determinePosition() async {
-  if (await Permission.location.request().isGranted) {
-    return await Geolocator.getCurrentPosition();
+  // Проверка, включен ли GPS
+  serviceEnabled = await Geolocator.isLocationServiceEnabled();
+  if (!serviceEnabled) {
+    return Future.error('Location services are disabled.');
   }
-  return null;
+
+  // Проверка разрешений
+  permission = await Geolocator.checkPermission();
+  if (permission == LocationPermission.denied) {
+    permission = await Geolocator.requestPermission();
+    if (permission == LocationPermission.denied) {
+      return Future.error('Location permissions are denied.');
+    }
+  }
+  
+  if (permission == LocationPermission.deniedForever) {
+    return Future.error('Location permissions are permanently denied.');
+  } 
+
+  // Получение текущей позиции
+  return await Geolocator.getCurrentPosition();
 }
 
-Future<void> moveToUserLocation(MapWindow? mapWindow_) async
+Future<void> addUserLocationPlacemark() async {
+  final imageProvider = image_provider.ImageProvider.fromImageProvider(const fl_material.AssetImage("assets/icons/user_location.png"));
+  userLocationPlacemark = mapWindow_!.map.mapObjects.addPlacemark();
+  var userPosition = await _determinePosition(); 
+  userLocationPlacemark!.geometry = Point(latitude: userPosition.latitude, longitude: userPosition.longitude);
+  userLocationPlacemark!.setIcon(imageProvider);
+}
+
+StreamSubscription<Position> positionStream = Geolocator.getPositionStream(
+  locationSettings: const LocationSettings(
+    accuracy: LocationAccuracy.high,
+    distanceFilter: 0,
+  ),
+).listen((Position position) {
+  final userPoint = Point(
+    latitude: position.latitude,
+    longitude: position.longitude,
+  );
+
+  // Обновить метку пользователя на карте
+  userLocationPlacemark!.geometry = userPoint;
+});
+
+void moveToUserLocation(MapWindow? mapWindow_) async
 { 
   if (mapWindow_ != null)
   { 
-    var targetPoint = Point(latitude: 56.837716, longitude: 60.596828);
-    // if (userPosition == null || lastPosition == null){
-    // mapWindow_!.map.move(CameraPosition(targetPoint, zoom: 15, azimuth: 0.0, tilt: 30.0));
-    // }
-    userPosition = await determinePosition(); 
-    if (userPosition != null) {
-      targetPoint = Point(latitude: userPosition!.latitude, longitude: userPosition!.longitude);
-      lastPosition = userPosition;
-    }
-    else if (lastPosition != null) {
-      targetPoint = Point(latitude: lastPosition!.latitude, longitude: lastPosition!.longitude);
-    }
+    var targetPoint = userLocationPlacemark!.geometry;
     mapWindow_.map.moveWithAnimation(
       CameraPosition(targetPoint, zoom: 15, azimuth: 0.0, tilt: 30.0),
       Animation(
@@ -80,4 +116,4 @@ Future<void> makePoints(MapWindow mapWindow_) async {
     }
     markerCollections.addTapListener(tabMarkerListener);
     markerCollections.clusterPlacemarks(clusterRadius: 60.0, minZoom: 15);
-  }
+}
