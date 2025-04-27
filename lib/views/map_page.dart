@@ -35,7 +35,8 @@ class _MapPageState extends State<MapPage> {
               await makePoints(mapWindow_!);
               // Костыль, чтобы пока позиция пользователя загружалась, карта заранее смотрела на Екатеринбург, а не на весь мир
               mapWindow_!.map.move(CameraPosition(defaultPoint, zoom: 12.5, azimuth: 0.0, tilt: 30.0));
-              await moveToUserLocation(mapWindow_);
+              await addUserLocationPlacemark();
+              moveToUserLocation(mapWindow_);
               mapkit.onStart();
             },
           ),

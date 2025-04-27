@@ -1,1 +1,0 @@
-final mapkitApiKey = "YOUR_YANDEX_MAPKIT_SDK_KEY";
