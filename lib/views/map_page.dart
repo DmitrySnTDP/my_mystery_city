@@ -32,7 +32,7 @@ class _MapPageState extends State<MapPage> {
             onMapCreated: (mapWindow) async {
               mapWindow_ = mapWindow;
               mapWindow.map.setMapStyle(await readJsonFile("assets/style/style_map.json"));
-              await makePoints(mapWindow_);
+              await makePoints(mapWindow_!);
               // Костыль, чтобы пока позиция пользователя загружалась, карта заранее смотрела на Екатеринбург, а не на весь мир
               mapWindow_!.map.move(CameraPosition(defaultPoint, zoom: 12.5, azimuth: 0.0, tilt: 30.0));
               await moveToUserLocation(mapWindow_);

@@ -4,17 +4,18 @@ import 'package:permission_handler/permission_handler.dart';
 
 import 'package:my_mystery_city/data/db_worker.dart';
 import 'package:my_mystery_city/listeners/map_object_tap_listener.dart';
+import 'package:my_mystery_city/listeners/cluster_listener.dart';
 
 import 'package:yandex_maps_mapkit/mapkit.dart';
 import 'package:yandex_maps_mapkit/image.dart' as image_provider;
-// import 'package:yandex_maps_mapkit/yandex_map.dart';
 
 
 Position? lastPosition;
 Position? userPosition;
 PlacemarkMapObject? placemark;
 MapObjectCollection? mapObjectCollection;
-final listener = MapObjectTapListenerImpl();
+final tabMarkerListener = MapObjectTapListenerImpl();
+final clusterListener = ClusterListenerImpl();
 
 final unknownMarker = image_provider.ImageProvider.fromImageProvider(const fl_material.AssetImage("assets/images/unknown_marker.png")); 
 final monumentMarker =  image_provider.ImageProvider.fromImageProvider(const fl_material.AssetImage("assets/images/monument_marker.png")); // 1
@@ -29,7 +30,7 @@ Future<Position?> determinePosition() async {
   return null;
 }
 
-Future<void> moveToUserLocation(mapWindow_) async
+Future<void> moveToUserLocation(MapWindow? mapWindow_) async
 { 
   if (mapWindow_ != null)
   { 
@@ -45,7 +46,7 @@ Future<void> moveToUserLocation(mapWindow_) async
     else if (lastPosition != null) {
       targetPoint = Point(latitude: lastPosition!.latitude, longitude: lastPosition!.longitude);
     }
-    mapWindow_!.map.moveWithAnimation(
+    mapWindow_.map.moveWithAnimation(
       CameraPosition(targetPoint, zoom: 15, azimuth: 0.0, tilt: 30.0),
       Animation(
         AnimationType.Smooth,
@@ -55,8 +56,8 @@ Future<void> moveToUserLocation(mapWindow_) async
   }
 }
 
-Future<void> makePoints(mapWindow_) async {
-    var markerCollections =  mapWindow_!.map.mapObjects.addCollection();
+Future<void> makePoints(MapWindow mapWindow_) async {
+    var markerCollections =  mapWindow_.map.mapObjects.addClusterizedPlacemarkCollection(clusterListener);
     final dbData = await getData();
     image_provider.ImageProvider? img;
 
@@ -76,6 +77,7 @@ Future<void> makePoints(mapWindow_) async {
       }
 
       markerCollections.addPlacemarkWithImage(Point(latitude: marker.latitude, longitude: marker.longitude), img!);
-      markerCollections.addTapListener(listener);
     }
+    markerCollections.addTapListener(tabMarkerListener);
+    markerCollections.clusterPlacemarks(clusterRadius: 60.0, minZoom: 15);
   }
