@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Animation;
 import 'package:flutter/services.dart';
 import 'package:yandex_maps_mapkit/mapkit.dart';
 import 'package:yandex_maps_mapkit/mapkit_factory.dart';
@@ -9,7 +9,7 @@ import 'package:geolocator/geolocator.dart';
 import 'db_worker.dart';
 
 Position? lastPosition;
-Position? position;
+Position? userPosition;
 MapWindow? mapWindow_;
 PlacemarkMapObject? placemark;
 MapObjectCollection? mapObjectCollection;
@@ -29,6 +29,15 @@ Future<String> _readJsonFile(String filePath)  {
   return rootBundle.loadString(filePath);
 }
 
+final class MapObjectTapListenerImpl implements MapObjectTapListener {
+
+  @override
+  bool onMapObjectTap(MapObject mapObject, Point point) {
+    print("Tapped the placemark: Point(latitude: ${point.latitude}, longitude: ${point.longitude})");
+    return true;
+  }
+}
+
 class MapPage extends StatefulWidget {
   const MapPage({super.key});
   @override
@@ -36,6 +45,7 @@ class MapPage extends StatefulWidget {
 }
 
 class _MapPageState extends State<MapPage> {
+  final listener = MapObjectTapListenerImpl();
 
   Future<void> _makePoints() async {
     var markerCollections =  mapWindow_!.map.mapObjects.addCollection();
@@ -58,6 +68,7 @@ class _MapPageState extends State<MapPage> {
       }
 
       markerCollections.addPlacemarkWithImage(Point(latitude: marker.latitude, longitude: marker.longitude), img!);
+      markerCollections.addTapListener(listener);
     }
   }
 
@@ -66,36 +77,65 @@ class _MapPageState extends State<MapPage> {
     if (mapWindow_ != null)
     { 
       var targetPoint = Point(latitude: 56.837716, longitude: 60.596828);
-      if (position == null && lastPosition == null){
+      if (userPosition == null && lastPosition == null){
         mapWindow_!.map.move(CameraPosition(targetPoint, zoom: 15, azimuth: 0.0, tilt: 30.0));
       }
-      position = await determinePosition(); 
-      if (position != null) {
-        targetPoint = Point(latitude: position!.latitude, longitude: position!.longitude);
-        lastPosition = position;
+      userPosition = await determinePosition(); 
+      if (userPosition != null) {
+        targetPoint = Point(latitude: userPosition!.latitude, longitude: userPosition!.longitude);
+        lastPosition = userPosition;
       }
       else if (lastPosition != null) {
         targetPoint = Point(latitude: lastPosition!.latitude, longitude: lastPosition!.longitude);
       }
-      mapWindow_!.map.move(CameraPosition(targetPoint, zoom: 15, azimuth: 0.0, tilt: 30.0));
+      mapWindow_!.map.moveWithAnimation(
+        CameraPosition(targetPoint, zoom: 15, azimuth: 0.0, tilt: 30.0),
+        Animation(
+          AnimationType.Smooth,
+          duration: 0.5,
+        )
+      );
     }
   }
 
+  var defaultPoint = Point(latitude: 56.837716, longitude: 60.596828);
+
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        body: YandexMap(
-          onMapCreated: (mapWindow) async
-          {
-            mapWindow_ = mapWindow;
-            mapWindow.map.setMapStyle(await _readJsonFile("assets/style/style_map.json"));
-            await _makePoints();
-            await _moveToUserLocation();
-            mapkit.onStart();
-          }
-        )
-      )
-    );
-  }
+  return MaterialApp(
+    theme: Theme.of(context),
+    home: Scaffold(
+      body: Stack(
+        children: [
+          YandexMap(
+            onMapCreated: (mapWindow) async {
+              mapWindow_ = mapWindow;
+              mapWindow.map.setMapStyle(await _readJsonFile("assets/style/style_map.json"));
+              await _makePoints();
+
+              // Костыль, чтобы пока позиция пользователя загружалась, карта заранее смотрела на Екатеринбург, а не на весь мир
+              mapWindow_!.map.move(CameraPosition(defaultPoint, zoom: 15, azimuth: 0.0, tilt: 30.0));
+
+              await _moveToUserLocation();
+              mapkit.onStart();
+            },
+          ),
+          Positioned(
+            bottom: 50,
+            right: 0,
+            child: ElevatedButton(
+              onPressed: () {
+                _moveToUserLocation();
+              },
+              style: ElevatedButton.styleFrom(
+                shape: CircleBorder(),
+              ),
+              child: Icon(Icons.near_me),
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
+}
 }
