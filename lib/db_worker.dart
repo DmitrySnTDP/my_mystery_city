@@ -1,4 +1,4 @@
-import 'package:my_mystery_city/get_points_data.dart';
+// import 'package:my_mystery_city/get_points_data.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 // import 'package:yandex_maps_mapkit/search.dart';
@@ -11,9 +11,9 @@ Future<List<MarkerMap>> getData() async {
   return data;
 }
 // final listener = SearchSuggestSessionSuggestListener;
-Future<void> get() async {
-  await searchMonuments();
-}
+// Future<void> get() async {
+//   await searchMonuments();
+// }
 
 class MarkerMap {
   final double latitude;
