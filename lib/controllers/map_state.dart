@@ -57,9 +57,10 @@ Future<Position?> _determinePosition() async {
 
 Future<void> addUserLocationPlacemark() async {
   final imageProvider = image_provider.ImageProvider.fromImageProvider(const fl_material.AssetImage("assets/icons/user_location.png"));
-  userLocationPlacemark = mapWindow_!.map.mapObjects.addPlacemark();
+  
   var userPosition = await _determinePosition(); 
   if (userPosition != null) {
+    userLocationPlacemark = mapWindow_!.map.mapObjects.addPlacemark();
     userLocationPlacemark!.geometry = Point(latitude: userPosition.latitude, longitude: userPosition.longitude);
     userLocationPlacemark!.setIcon(imageProvider);
   }
@@ -77,21 +78,28 @@ StreamSubscription<Position> positionStream = Geolocator.getPositionStream(
   );
 
   // Обновить метку пользователя на карте
-  userLocationPlacemark!.geometry = userPoint;
+  if (userLocationPlacemark != null){
+    userLocationPlacemark?.geometry = userPoint;
+  }
 });
 
 void moveToUserLocation(MapWindow? mapWindow_) async
 { 
   if (mapWindow_ != null)
   { 
-    var targetPoint = userLocationPlacemark!.geometry;
-    mapWindow_.map.moveWithAnimation(
-      CameraPosition(targetPoint, zoom: 15, azimuth: 0.0, tilt: 30.0),
-      Animation(
-        AnimationType.Smooth,
-        duration: 0.5,
-      )
-    );
+    if (userLocationPlacemark == null){
+      // TO DO выводить виджет о необходимости включить местоположение 
+    }
+    else {
+      var targetPoint = userLocationPlacemark!.geometry;
+      mapWindow_.map.moveWithAnimation(
+        CameraPosition(targetPoint, zoom: 15, azimuth: 0.0, tilt: 30.0),
+        Animation(
+          AnimationType.Smooth,
+          duration: 0.5,
+        )
+      );
+    }
   }
 }
 
