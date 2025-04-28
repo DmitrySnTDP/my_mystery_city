@@ -2,8 +2,8 @@ import 'dart:async';
 
 import 'package:flutter/material.dart' as fl_material;
 import 'package:geolocator/geolocator.dart';
-import 'package:my_mystery_city/views/map_page.dart';
 
+import 'package:my_mystery_city/views/map_page.dart';
 import 'package:my_mystery_city/data/db_worker.dart';
 import 'package:my_mystery_city/listeners/map_object_tap_listener.dart';
 import 'package:my_mystery_city/listeners/cluster_listener.dart';
