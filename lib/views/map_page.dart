@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
+import 'dart:async';
 
-// import '../listeners/map_object_tap_listener.dart';
 import 'package:my_mystery_city/controllers/map_state.dart';
 import 'package:my_mystery_city/data/reader_json.dart';
 
@@ -8,8 +9,7 @@ import 'package:yandex_maps_mapkit/mapkit.dart' hide LocationSettings;
 import 'package:yandex_maps_mapkit/mapkit_factory.dart';
 import 'package:yandex_maps_mapkit/yandex_map.dart';
 
-import 'package:geolocator/geolocator.dart';
-import 'dart:async';
+
 
 late StreamSubscription<Position> _positionStream;
 
@@ -28,32 +28,32 @@ class _MapPageState extends State<MapPage> {
   // Обновление метки пользователя
   @override
   void initState() {
-  super.initState();
+    super.initState();
 
-  _positionStream = Geolocator.getPositionStream(
-    locationSettings: const LocationSettings(
-      accuracy: LocationAccuracy.high,
-      distanceFilter: 0,
-    ),
-  ).listen((Position position) {
-    final userPoint = Point(
-      latitude: position.latitude,
-      longitude: position.longitude,
-    );
+    _positionStream = Geolocator.getPositionStream(
+      locationSettings: const LocationSettings(
+        accuracy: LocationAccuracy.high,
+        distanceFilter: 0,
+      ),
+    ).listen((Position position) {
+      final userPoint = Point(
+        latitude: position.latitude,
+        longitude: position.longitude,
+      );
 
-    if (userLocationPlacemark != null) {
-      setState(() {
-        userLocationPlacemark!.geometry = userPoint;
-      });
-    }
-  });
-}
+      if (userLocationPlacemark != null) {
+        setState(() {
+          userLocationPlacemark!.geometry = userPoint;
+        });
+      }
+    });
+  }
 
-@override
-void dispose() {
-  _positionStream.cancel(); // Остановить поток при закрытии виджета
-  super.dispose();
-}
+  @override
+  void dispose() {
+    _positionStream.cancel(); // Остановить поток при закрытии виджета
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -66,7 +66,9 @@ void dispose() {
             onMapCreated: (mapWindow) async {
               mapWindow_ = mapWindow;
               mapWindow.map.setMapStyle(await readJsonFile("assets/style/style_map.json"));
-              await makePoints(mapWindow_!);
+              if (userPosition == null){
+                await makePoints(mapWindow_!);
+              }
               // Костыль, чтобы пока позиция пользователя загружалась, карта заранее смотрела на Екатеринбург, а не на весь мир
               mapWindow_!.map.move(CameraPosition(defaultPoint, zoom: 12.5, azimuth: 0.0, tilt: 30.0));
               await addUserLocationPlacemark();

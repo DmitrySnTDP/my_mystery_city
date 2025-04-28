@@ -2,8 +2,8 @@ import 'dart:async';
 
 import 'package:flutter/material.dart' as fl_material;
 import 'package:geolocator/geolocator.dart';
-import 'package:my_mystery_city/views/map_page.dart';
 
+import 'package:my_mystery_city/views/map_page.dart';
 import 'package:my_mystery_city/data/db_worker.dart';
 import 'package:my_mystery_city/listeners/map_object_tap_listener.dart';
 import 'package:my_mystery_city/listeners/cluster_listener.dart';
@@ -25,14 +25,15 @@ final monumentMarker =  image_provider.ImageProvider.fromImageProvider(const fl_
 final intrestPlaceMarker = image_provider.ImageProvider.fromImageProvider(const fl_material.AssetImage("assets/images/intresting_place_marker.png")); // 2
 final startRouteMarker = image_provider.ImageProvider.fromImageProvider(const fl_material.AssetImage("assets/images/start_route_marker.png"));
 
-Future<Position> _determinePosition() async {
+Future<Position?> _determinePosition() async {
   bool serviceEnabled;
   LocationPermission permission;
 
   // Проверка, включен ли GPS
   serviceEnabled = await Geolocator.isLocationServiceEnabled();
   if (!serviceEnabled) {
-    return Future.error('Location services are disabled.');
+    return null;
+    // return Future.error('Location services are disabled.');
   }
 
   // Проверка разрешений
@@ -40,12 +41,14 @@ Future<Position> _determinePosition() async {
   if (permission == LocationPermission.denied) {
     permission = await Geolocator.requestPermission();
     if (permission == LocationPermission.denied) {
-      return Future.error('Location permissions are denied.');
+      return null;
+      // return Future.error('Location permissions are denied.');
     }
   }
   
   if (permission == LocationPermission.deniedForever) {
-    return Future.error('Location permissions are permanently denied.');
+    return null;
+    // return Future.error('Location permissions are permanently denied.');
   } 
 
   // Получение текущей позиции
@@ -56,8 +59,10 @@ Future<void> addUserLocationPlacemark() async {
   final imageProvider = image_provider.ImageProvider.fromImageProvider(const fl_material.AssetImage("assets/icons/user_location.png"));
   userLocationPlacemark = mapWindow_!.map.mapObjects.addPlacemark();
   var userPosition = await _determinePosition(); 
-  userLocationPlacemark!.geometry = Point(latitude: userPosition.latitude, longitude: userPosition.longitude);
-  userLocationPlacemark!.setIcon(imageProvider);
+  if (userPosition != null) {
+    userLocationPlacemark!.geometry = Point(latitude: userPosition.latitude, longitude: userPosition.longitude);
+    userLocationPlacemark!.setIcon(imageProvider);
+  }
 }
 
 StreamSubscription<Position> positionStream = Geolocator.getPositionStream(
