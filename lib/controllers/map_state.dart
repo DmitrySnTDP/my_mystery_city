@@ -25,14 +25,15 @@ final monumentMarker =  image_provider.ImageProvider.fromImageProvider(const fl_
 final intrestPlaceMarker = image_provider.ImageProvider.fromImageProvider(const fl_material.AssetImage("assets/images/intresting_place_marker.png")); // 2
 final startRouteMarker = image_provider.ImageProvider.fromImageProvider(const fl_material.AssetImage("assets/images/start_route_marker.png"));
 
-Future<Position> _determinePosition() async {
+Future<Position?> _determinePosition() async {
   bool serviceEnabled;
   LocationPermission permission;
 
   // Проверка, включен ли GPS
   serviceEnabled = await Geolocator.isLocationServiceEnabled();
   if (!serviceEnabled) {
-    return Future.error('Location services are disabled.');
+    return null;
+    // return Future.error('Location services are disabled.');
   }
 
   // Проверка разрешений
@@ -40,12 +41,14 @@ Future<Position> _determinePosition() async {
   if (permission == LocationPermission.denied) {
     permission = await Geolocator.requestPermission();
     if (permission == LocationPermission.denied) {
-      return Future.error('Location permissions are denied.');
+      return null;
+      // return Future.error('Location permissions are denied.');
     }
   }
   
   if (permission == LocationPermission.deniedForever) {
-    return Future.error('Location permissions are permanently denied.');
+    return null;
+    // return Future.error('Location permissions are permanently denied.');
   } 
 
   // Получение текущей позиции
@@ -54,10 +57,13 @@ Future<Position> _determinePosition() async {
 
 Future<void> addUserLocationPlacemark() async {
   final imageProvider = image_provider.ImageProvider.fromImageProvider(const fl_material.AssetImage("assets/icons/user_location.png"));
-  userLocationPlacemark = mapWindow_!.map.mapObjects.addPlacemark();
+  
   var userPosition = await _determinePosition(); 
-  userLocationPlacemark!.geometry = Point(latitude: userPosition.latitude, longitude: userPosition.longitude);
-  userLocationPlacemark!.setIcon(imageProvider);
+  if (userPosition != null) {
+    userLocationPlacemark = mapWindow_!.map.mapObjects.addPlacemark();
+    userLocationPlacemark!.geometry = Point(latitude: userPosition.latitude, longitude: userPosition.longitude);
+    userLocationPlacemark!.setIcon(imageProvider);
+  }
 }
 
 StreamSubscription<Position> positionStream = Geolocator.getPositionStream(
@@ -72,21 +78,28 @@ StreamSubscription<Position> positionStream = Geolocator.getPositionStream(
   );
 
   // Обновить метку пользователя на карте
-  userLocationPlacemark!.geometry = userPoint;
+  if (userLocationPlacemark != null){
+    userLocationPlacemark?.geometry = userPoint;
+  }
 });
 
 void moveToUserLocation(MapWindow? mapWindow_) async
 { 
   if (mapWindow_ != null)
   { 
-    var targetPoint = userLocationPlacemark!.geometry;
-    mapWindow_.map.moveWithAnimation(
-      CameraPosition(targetPoint, zoom: 15, azimuth: 0.0, tilt: 30.0),
-      Animation(
-        AnimationType.Smooth,
-        duration: 0.5,
-      )
-    );
+    if (userLocationPlacemark == null){
+      // TO DO выводить виджет о необходимости включить местоположение 
+    }
+    else {
+      var targetPoint = userLocationPlacemark!.geometry;
+      mapWindow_.map.moveWithAnimation(
+        CameraPosition(targetPoint, zoom: 15, azimuth: 0.0, tilt: 30.0),
+        Animation(
+          AnimationType.Smooth,
+          duration: 0.5,
+        )
+      );
+    }
   }
 }
 
