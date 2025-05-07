@@ -14,7 +14,7 @@ class MarkerMap {
   final double latitude;
   final double longitude;
   final int typePoint;
-  final int isChecked;
+  int isChecked;
   final String name;
   final String description;
 
@@ -102,4 +102,30 @@ Future<void> deleteMarkerMap(String name) async {
     where: 'name = ?',
     whereArgs: [name],
   );
+}
+
+Future<void> updateMarkerMapExploreStatus(MarkerMap marker) async {
+  final db = database!;
+
+  await db.update(
+    'markers_data',
+    {'is_checked': marker.isChecked},
+    where: 'latitude = ? AND longitude = ?',
+    whereArgs: [marker.latitude, marker.longitude],
+  );
+}
+
+Future<MarkerMap?> getMarkerMap(double latitude, double longitude) async {
+  final db = database!;
+  final result = await db.query(
+    'markers_data',
+    where: 'latitude = ? AND longitude = ?',
+    whereArgs: [latitude, longitude],
+    limit: 1,
+  );
+  for (var markerData in result)
+  {
+    return MarkerMap.fromJson(markerData);
+  }
+  return null;
 }

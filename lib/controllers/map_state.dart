@@ -16,14 +16,36 @@ Position? lastPosition;
 Position? userPosition;
 PlacemarkMapObject? placemark;
 PlacemarkMapObject? userLocationPlacemark;
-MapObjectCollection? mapObjectCollection;
-final tabMarkerListener = MapObjectTapListenerImpl();
+// List<PlacemarkMapObject>? placemarksCache;
+ClusterizedPlacemarkCollection? markerCollections;
+MarkerMap? tappedMarker;
+
+final MapObjectTapListenerImpl tabMarkerListener = MapObjectTapListenerImpl(onMapObjectTapped:
+  (mapObject , point ) {
+    if (mapObject is PlacemarkMapObject) {
+      getMarkerMap(mapObject.geometry.latitude, mapObject.geometry.longitude).then((marker) {
+        tappedMarker = marker;
+        continueLogic();
+      });  
+    }
+    return true;
+  }
+);
 final clusterListener = ClusterListenerImpl();
 
 final unknownMarker = image_provider.ImageProvider.fromImageProvider(const fl_material.AssetImage("assets/images/unknown_marker.png")); 
 final monumentMarker =  image_provider.ImageProvider.fromImageProvider(const fl_material.AssetImage("assets/images/monument_marker.png")); // 1
 final intrestPlaceMarker = image_provider.ImageProvider.fromImageProvider(const fl_material.AssetImage("assets/images/intresting_place_marker.png")); // 2
 final startRouteMarker = image_provider.ImageProvider.fromImageProvider(const fl_material.AssetImage("assets/images/start_route_marker.png"));
+
+void continueLogic() {
+  if (tappedMarker != null && userLocationPlacemark != null && tappedMarker!.isChecked == 0 && (userLocationPlacemark!.geometry.latitude - tappedMarker!.latitude).abs() < 0.001 && (userLocationPlacemark!.geometry.longitude - tappedMarker!.longitude).abs() < 0.001) {
+        // removeUnknownPoint(tappedMarker!);
+        tappedMarker!.isChecked = 1;
+        updateMarkerMapExploreStatus(tappedMarker!);
+        // addPoint(tappedMarker!);
+      }
+}
 
 Future<Position?> _determinePosition() async {
   bool serviceEnabled;
@@ -103,8 +125,31 @@ void moveToUserLocation(MapWindow? mapWindow_) async
   }
 }
 
+void removeUnknownPoint(MarkerMap marker) {
+  // markerCollections!.remove();
+}
+
+void addPoint(MarkerMap marker) {
+  image_provider.ImageProvider? img;
+
+  if (marker.isChecked == 0){
+        img = unknownMarker;
+      }
+      else {
+        switch(marker.typePoint){
+          case(1):
+            img = monumentMarker;
+            break;
+          case(2):
+            img = intrestPlaceMarker;
+            break;
+        }
+      }
+      markerCollections!.addPlacemarkWithImage(Point(latitude: marker.latitude, longitude: marker.longitude), img!);
+}
+
 Future<void> makePoints(MapWindow mapWindow_) async {
-    var markerCollections =  mapWindow_.map.mapObjects.addClusterizedPlacemarkCollection(clusterListener);
+    markerCollections =  mapWindow_.map.mapObjects.addClusterizedPlacemarkCollection(clusterListener);
     final dbData = await getData();
     image_provider.ImageProvider? img;
 
@@ -122,9 +167,9 @@ Future<void> makePoints(MapWindow mapWindow_) async {
             break;
         }
       }
-
-      markerCollections.addPlacemarkWithImage(Point(latitude: marker.latitude, longitude: marker.longitude), img!);
+      // _placemarksCache[id] = placemark;
+      markerCollections!.addPlacemarkWithImage(Point(latitude: marker.latitude, longitude: marker.longitude), img!);
     }
-    markerCollections.addTapListener(tabMarkerListener);
-    markerCollections.clusterPlacemarks(clusterRadius: 60.0, minZoom: 15);
+    markerCollections!.addTapListener(tabMarkerListener);
+    markerCollections!.clusterPlacemarks(clusterRadius: 60.0, minZoom: 15);
 }

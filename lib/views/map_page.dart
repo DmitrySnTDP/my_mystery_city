@@ -4,6 +4,7 @@ import 'dart:async';
 
 import 'package:my_mystery_city/controllers/map_state.dart';
 import 'package:my_mystery_city/data/reader_json.dart';
+import 'package:my_mystery_city/views/point_window_on_map.dart';
 
 import 'package:yandex_maps_mapkit/mapkit.dart' hide LocationSettings;
 import 'package:yandex_maps_mapkit/mapkit_factory.dart';
@@ -89,6 +90,8 @@ class _MapPageState extends State<MapPage> {
               child: Icon(Icons.near_me),
             ),
           ),
+          if (tappedMarker != null)
+            MarkerOverlay(marker: tappedMarker!),
         ],
       ),
     ),
