@@ -83,7 +83,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 NavigationDestination(
                   selectedIcon: ImageIcon(const AssetImage("assets/icons/routes.png"), color: colorOnClick),
                   icon: const ImageIcon(AssetImage('assets/icons/routes.png')),
-                  label: 'Маршруты',
+                  label: 'Категории',
                 ),
                 NavigationDestination(
                   selectedIcon: ImageIcon(const AssetImage("assets/icons/achievements.png"), color: colorOnClick),
