@@ -12,20 +12,20 @@ import 'package:yandex_maps_mapkit/mapkit.dart' hide LocationSettings;
 import 'package:yandex_maps_mapkit/image.dart' as image_provider;
 
 
-Position? lastPosition;
 Position? userPosition;
-PlacemarkMapObject? placemark;
 PlacemarkMapObject? userLocationPlacemark;
+// PlacemarkMapObject? placemark;
 // List<PlacemarkMapObject>? placemarksCache;
 ClusterizedPlacemarkCollection? markerCollections;
-MarkerMap? tappedMarker;
+
+final fl_material.ValueNotifier<MarkerMap?> tappedMarker = fl_material.ValueNotifier(null);
 
 final MapObjectTapListenerImpl tabMarkerListener = MapObjectTapListenerImpl(onMapObjectTapped:
   (mapObject , point ) {
     if (mapObject is PlacemarkMapObject) {
       getMarkerMap(mapObject.geometry.latitude, mapObject.geometry.longitude).then((marker) {
-        tappedMarker = marker;
-        continueLogic();
+        tappedMarker.value = marker;
+      continueLogic();
       });  
     }
     return true;
@@ -39,12 +39,16 @@ final intrestPlaceMarker = image_provider.ImageProvider.fromImageProvider(const 
 final startRouteMarker = image_provider.ImageProvider.fromImageProvider(const fl_material.AssetImage("assets/images/start_route_marker.png"));
 
 void continueLogic() {
-  if (tappedMarker != null && userLocationPlacemark != null && tappedMarker!.isChecked == 0 && (userLocationPlacemark!.geometry.latitude - tappedMarker!.latitude).abs() < 0.001 && (userLocationPlacemark!.geometry.longitude - tappedMarker!.longitude).abs() < 0.001) {
-        // removeUnknownPoint(tappedMarker!);
-        tappedMarker!.isChecked = 1;
-        updateMarkerMapExploreStatus(tappedMarker!);
-        // addPoint(tappedMarker!);
-      }
+  if (tappedMarker.value != null && tappedMarker.value!.isChecked == 0) {
+    if (userLocationPlacemark != null && (userLocationPlacemark!.geometry.latitude - tappedMarker.value!.latitude).abs() < 0.001
+      && (userLocationPlacemark!.geometry.longitude - tappedMarker.value!.longitude).abs() < 0.001) {
+      // removeUnknownPoint(tappedMarker!);
+      tappedMarker.value!.isChecked = 1;
+      updateMarkerMapExploreStatus(tappedMarker.value!);
+      // addPoint(tappedMarker!);
+    }
+  }
+  
 }
 
 Future<Position?> _determinePosition() async {
@@ -55,7 +59,6 @@ Future<Position?> _determinePosition() async {
   serviceEnabled = await Geolocator.isLocationServiceEnabled();
   if (!serviceEnabled) {
     return null;
-    // return Future.error('Location services are disabled.');
   }
 
   // Проверка разрешений
@@ -64,13 +67,11 @@ Future<Position?> _determinePosition() async {
     permission = await Geolocator.requestPermission();
     if (permission == LocationPermission.denied) {
       return null;
-      // return Future.error('Location permissions are denied.');
     }
   }
   
   if (permission == LocationPermission.deniedForever) {
     return null;
-    // return Future.error('Location permissions are permanently denied.');
   } 
 
   // Получение текущей позиции
@@ -125,9 +126,9 @@ void moveToUserLocation(MapWindow? mapWindow_) async
   }
 }
 
-void removeUnknownPoint(MarkerMap marker) {
+// void removeUnknownPoint(MarkerMap marker) {
   // markerCollections!.remove();
-}
+// }
 
 void addPoint(MarkerMap marker) {
   image_provider.ImageProvider? img;
@@ -151,24 +152,9 @@ void addPoint(MarkerMap marker) {
 Future<void> makePoints(MapWindow mapWindow_) async {
     markerCollections =  mapWindow_.map.mapObjects.addClusterizedPlacemarkCollection(clusterListener);
     final dbData = await getData();
-    image_provider.ImageProvider? img;
 
     for (final marker in dbData) {
-      if (marker.isChecked == 0){
-        img = unknownMarker;
-      }
-      else {
-        switch(marker.typePoint){
-          case(1):
-            img = monumentMarker;
-            break;
-          case(2):
-            img = intrestPlaceMarker;
-            break;
-        }
-      }
-      // _placemarksCache[id] = placemark;
-      markerCollections!.addPlacemarkWithImage(Point(latitude: marker.latitude, longitude: marker.longitude), img!);
+      addPoint(marker);
     }
     markerCollections!.addTapListener(tabMarkerListener);
     markerCollections!.clusterPlacemarks(clusterRadius: 60.0, minZoom: 15);

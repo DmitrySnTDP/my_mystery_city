@@ -1,12 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:my_mystery_city/controllers/map_state.dart';
 import 'package:my_mystery_city/data/db_worker.dart';
 
 
 class MarkerOverlay extends StatelessWidget {
   final MarkerMap marker;
+  final VoidCallback onClose;
   
-  const MarkerOverlay({super.key, required this.marker});
+  const MarkerOverlay({
+    super.key,
+    required this.marker,
+    required this.onClose,
+    }
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -18,13 +23,14 @@ class MarkerOverlay extends StatelessWidget {
       child: DraggableScrollableSheet(
         expand: false,
         initialChildSize: 0.5,
-        minChildSize: 0.00, 
+        minChildSize: 0.05, 
         maxChildSize: 1.0,
         builder: (context, scrollController) {
           return NotificationListener<DraggableScrollableNotification>(
             onNotification: (notification) {
-              if (notification.extent <= 0.05) {
-                tappedMarker = null;
+              if (notification.extent <= 0.1) {
+                // tappedMarker = null;
+                onClose();
                 return true;
               }
               return false;
@@ -104,7 +110,7 @@ List<Widget> getText(MarkerMap marker){
                 ),
                 child: Image(
                   image: AssetImage(marker.imgLink),
-                  fit: BoxFit.cover,
+                  fit: BoxFit.fitWidth,
                 ),
               ),
             ),
@@ -112,14 +118,12 @@ List<Widget> getText(MarkerMap marker){
               flex: 3,
               child: Padding(
                 padding: EdgeInsets.only(left: 13, right: 16, top: 4, bottom: 4),
-                child : Expanded(
-                  child: Text(
-                    marker.shortDescription,
-                    style: TextStyle(fontSize: 12)
-                  ),
+                child: Text(
+                  marker.shortDescription,
+                  style: TextStyle(fontSize: 12)
                 ),
-              )
-            ),
+              ),
+            )
           ],
         ),
       ),

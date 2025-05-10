@@ -24,12 +24,18 @@ class MapPage extends StatefulWidget {
 }
 
 class _MapPageState extends State<MapPage> {
+  VoidCallback? _listener;
   var defaultPoint = Point(latitude: 56.837716, longitude: 60.596828); // убрать с костылём зума на екб
 
   // Обновление метки пользователя
   @override
   void initState() {
     super.initState();
+
+    _listener = () {
+      if (mounted) setState(() {}); // Обновляем виджет
+    };
+    tappedMarker.addListener(_listener!);
 
     _positionStream = Geolocator.getPositionStream(
       locationSettings: const LocationSettings(
@@ -53,6 +59,7 @@ class _MapPageState extends State<MapPage> {
   @override
   void dispose() {
     _positionStream.cancel(); // Остановить поток при закрытии виджета
+    tappedMarker.removeListener(_listener!);
     super.dispose();
   }
 
@@ -67,14 +74,14 @@ class _MapPageState extends State<MapPage> {
             onMapCreated: (mapWindow) async {
               mapWindow_ = mapWindow;
               mapWindow.map.setMapStyle(await readJsonFile("assets/style/style_map.json"));
+              // Костыль, чтобы пока позиция пользователя загружалась, карта заранее смотрела на Екатеринбург, а не на весь мир
+              mapWindow_!.map.move(CameraPosition(defaultPoint, zoom: 12.5, azimuth: 0.0, tilt: 30.0));
+              mapkit.onStart();
               if (userPosition == null){
                 await makePoints(mapWindow_!);
               }
-              // Костыль, чтобы пока позиция пользователя загружалась, карта заранее смотрела на Екатеринбург, а не на весь мир
-              mapWindow_!.map.move(CameraPosition(defaultPoint, zoom: 12.5, azimuth: 0.0, tilt: 30.0));
               await addUserLocationPlacemark();
               moveToUserLocation(mapWindow_);
-              mapkit.onStart();
             },
           ),
           Positioned(
@@ -90,8 +97,16 @@ class _MapPageState extends State<MapPage> {
               child: Icon(Icons.near_me),
             ),
           ),
-          if (tappedMarker != null)
-            MarkerOverlay(marker: tappedMarker!),
+          if (tappedMarker.value != null)
+            MarkerOverlay(
+              marker: tappedMarker.value!,
+              onClose: () {
+                setState(() {
+                  tappedMarker.value = null;
+                }
+              );
+            },
+          ),
         ],
       ),
     ),
