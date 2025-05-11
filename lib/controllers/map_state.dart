@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'dart:core';
+import 'dart:core' as dart_core;
 
 import 'package:flutter/material.dart' as fl_material;
 import 'package:geolocator/geolocator.dart';
@@ -14,10 +16,7 @@ import 'package:yandex_maps_mapkit/image.dart' as image_provider;
 
 Position? userPosition;
 PlacemarkMapObject? userLocationPlacemark;
-// PlacemarkMapObject? placemark;
-// List<PlacemarkMapObject>? placemarksCache;
 ClusterizedPlacemarkCollection? markerCollections;
-
 final fl_material.ValueNotifier<MarkerMap?> tappedMarker = fl_material.ValueNotifier(null);
 
 final MapObjectTapListenerImpl tabMarkerListener = MapObjectTapListenerImpl(onMapObjectTapped:
@@ -31,9 +30,10 @@ final MapObjectTapListenerImpl tabMarkerListener = MapObjectTapListenerImpl(onMa
     return true;
   }
 );
+
 final clusterListener = ClusterListenerImpl();
 
-final unknownMarker = image_provider.ImageProvider.fromImageProvider(const fl_material.AssetImage("assets/images/unknown_marker.png")); 
+final unknownMarker = image_provider.ImageProvider.fromImageProvider(const fl_material.AssetImage("assets/images/unknown_marker.png")); // 0
 final monumentMarker =  image_provider.ImageProvider.fromImageProvider(const fl_material.AssetImage("assets/images/monument_marker.png")); // 1
 final intrestPlaceMarker = image_provider.ImageProvider.fromImageProvider(const fl_material.AssetImage("assets/images/intresting_place_marker.png")); // 2
 final startRouteMarker = image_provider.ImageProvider.fromImageProvider(const fl_material.AssetImage("assets/images/start_route_marker.png"));
@@ -42,10 +42,10 @@ void continueLogic() {
   if (tappedMarker.value != null && tappedMarker.value!.isChecked == 0) {
     if (userLocationPlacemark != null && (userLocationPlacemark!.geometry.latitude - tappedMarker.value!.latitude).abs() < 0.001
       && (userLocationPlacemark!.geometry.longitude - tappedMarker.value!.longitude).abs() < 0.001) {
-      // removeUnknownPoint(tappedMarker!);
+      removeUnknownPoint(tappedMarker.value!);
       tappedMarker.value!.isChecked = 1;
       updateMarkerMapExploreStatus(tappedMarker.value!);
-      // addPoint(tappedMarker!);
+      makePoints(mapWindow_!);
     }
   }
   
@@ -126,9 +126,9 @@ void moveToUserLocation(MapWindow? mapWindow_) async
   }
 }
 
-// void removeUnknownPoint(MarkerMap marker) {
-  // markerCollections!.remove();
-// }
+void removeUnknownPoint(MarkerMap marker) {
+  markerCollections!.clear();
+}
 
 void addPoint(MarkerMap marker) {
   image_provider.ImageProvider? img;
