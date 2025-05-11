@@ -13,16 +13,9 @@ import 'package:my_mystery_city/listeners/cluster_listener.dart';
 import 'package:yandex_maps_mapkit/mapkit.dart' hide LocationSettings;
 import 'package:yandex_maps_mapkit/image.dart' as image_provider;
 
-// List<List<Point>> markersLists = [List.];
-// List<List<MarkerMap>> markersCache = List.empty();
-// List<Point> monumentsMaprekers = List.empty(growable: true);
-// List<Point> unknownPlacesMarkers = List.empty(growable: true);
-// List<Point> intrestPlaceMarkers = List.empty(growable: true);
 
 Position? userPosition;
 PlacemarkMapObject? userLocationPlacemark;
-// PlacemarkMapObject? placemark;
-// final dart_core.Map<MarkerMap, int> markerCache = {};
 ClusterizedPlacemarkCollection? markerCollections;
 final fl_material.ValueNotifier<MarkerMap?> tappedMarker = fl_material.ValueNotifier(null);
 
@@ -52,7 +45,6 @@ void continueLogic() {
       removeUnknownPoint(tappedMarker.value!);
       tappedMarker.value!.isChecked = 1;
       updateMarkerMapExploreStatus(tappedMarker.value!);
-      // addPoint(tappedMarker.value!);
       makePoints(mapWindow_!);
     }
   }
@@ -135,12 +127,6 @@ void moveToUserLocation(MapWindow? mapWindow_) async
 }
 
 void removeUnknownPoint(MarkerMap marker) {
-  // var index = markerCache[marker];
-  // if (index != null) {
-    // unknownPlacesMarkers.removeAt(index);
-    // markerCache.remove(marker);
-
-  // }
   markerCollections!.clear();
 }
 
@@ -149,20 +135,13 @@ void addPoint(MarkerMap marker) {
 
   if (marker.isChecked == 0){
         img = unknownMarker;
-        // markersLists[0].add(Point(latitude: marker.latitude, longitude: marker.longitude));
-        // unknownPlacesMarkers.add(Point(latitude: marker.latitude, longitude: marker.longitude));
       }
       else {
         switch(marker.typePoint){
           case(1):
-            // markersLists[1].add(Point(latitude: marker.latitude, longitude: marker.longitude));
-            // monumentsMaprekers.add(Point(latitude: marker.latitude, longitude: marker.longitude));
             img = monumentMarker;
             break;
           case(2):
-            // markersLists[2].add(Point(latitude: marker.latitude, longitude: marker.longitude));
-            
-            // intrestPlaceMarkers.add(Point(latitude: marker.latitude, longitude: marker.longitude));
             img = intrestPlaceMarker;
             break;
         }
@@ -171,20 +150,12 @@ void addPoint(MarkerMap marker) {
 }
 
 Future<void> makePoints(MapWindow mapWindow_) async {
-    // if (unknownPlacesMarkers.isEmpty) {
-      markerCollections =  mapWindow_.map.mapObjects.addClusterizedPlacemarkCollection(clusterListener);
-      final dbData = await getData();
+    markerCollections =  mapWindow_.map.mapObjects.addClusterizedPlacemarkCollection(clusterListener);
+    final dbData = await getData();
 
-      for (final marker in dbData) {
-        addPoint(marker);
-      // }
+    for (final marker in dbData) {
+      addPoint(marker);
     }
-    // final iconStyle0 = IconStyle(anchor: null, rotationType: RotationType.NoRotation, zIndex: 1, visible: true, scale: 1.0, tappableArea: null);
-    // final iconStyle1 = IconStyle(anchor: null, rotationType: RotationType.NoRotation, zIndex: 2, visible: true, scale: 1.0, tappableArea: null);
-    // final iconStyle2 = IconStyle(anchor: null, rotationType: RotationType.NoRotation, zIndex: 3, visible: true, scale: 1.0, tappableArea: null);
-    // markerCollections!.addPlacemarkWithImageStyle(unknownMarker, iconStyle0, points: unknownPlacesMarkers);
-    // markerCollections!.addPlacemarkWithImageStyle(monumentMarker, iconStyle1, points: monumentsMaprekers);
-    // markerCollections!.addPlacemarkWithImageStyle(intrestPlaceMarker, iconStyle2, points: intrestPlaceMarkers);
     markerCollections!.addTapListener(tabMarkerListener);
     markerCollections!.clusterPlacemarks(clusterRadius: 60.0, minZoom: 15);
 }
