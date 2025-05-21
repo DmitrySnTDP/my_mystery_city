@@ -38,9 +38,6 @@ class _MyHomePageState extends State<MyHomePage> {
         page = CategoriesPage();
         break;
       case 2:
-        page = Placeholder(color: Colors.yellow,);
-        break;
-      case 3:
         page = Placeholder(color: Colors.green,);
         break;
     }
@@ -85,12 +82,6 @@ class _MyHomePageState extends State<MyHomePage> {
                   selectedIcon: ImageIcon(const AssetImage("assets/icons/routes.png"), color: colorOnClick),
                   icon: const ImageIcon(AssetImage('assets/icons/routes.png')),
                   label: 'Категории',
-                ),
-                NavigationDestination(
-                  selectedIcon: ImageIcon(const AssetImage("assets/icons/achievements.png"), color: colorOnClick),
-                  icon: const ImageIcon(AssetImage('assets/icons/achievements.png')),
-                  label: 'Достижения',
-                  
                 ),
                 NavigationDestination(
                   selectedIcon: ImageIcon(const AssetImage("assets/icons/profile.png"), color: colorOnClick),

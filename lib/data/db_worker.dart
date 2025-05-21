@@ -64,7 +64,7 @@ Future<void>createTable() async {
   var database_ = openDatabase(join(await getDatabasesPath(), "assets/db/db_local.db"),
     onCreate: (db, version) {
       return db.execute(
-        'CREATE TABLE markers_data (latitude REAL NOT NULL, longitude	REAL NOT NULL, type_point	INTEGER NOT NULL DEFAULT 0 CHECK(type_point >= 0 AND type_point < 3), is_checked	BLOB NOT NULL, name	TEXT,	description	TEXT, short_description TEXT, img_link TEXT,	PRIMARY KEY(latitude, longitude))',
+        'CREATE TABLE markers_data (latitude REAL NOT NULL, longitude	REAL NOT NULL, type_point	INTEGER NOT NULL DEFAULT 1 CHECK(type_point >= 1 AND type_point <= 5), is_checked	BLOB NOT NULL, name	TEXT,	description	TEXT, short_description TEXT, img_link TEXT,	PRIMARY KEY(latitude, longitude))',
       );
     },
     version: 1,

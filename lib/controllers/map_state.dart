@@ -32,11 +32,13 @@ final MapObjectTapListenerImpl tabMarkerListener = MapObjectTapListenerImpl(onMa
 );
 
 final clusterListener = ClusterListenerImpl();
-
-final unknownMarker = image_provider.ImageProvider.fromImageProvider(const fl_material.AssetImage("assets/images/unknown_marker.png")); // 0
-final monumentMarker =  image_provider.ImageProvider.fromImageProvider(const fl_material.AssetImage("assets/images/monument_marker.png")); // 1
-final intrestPlaceMarker = image_provider.ImageProvider.fromImageProvider(const fl_material.AssetImage("assets/images/intresting_place_marker.png")); // 2
-final startRouteMarker = image_provider.ImageProvider.fromImageProvider(const fl_material.AssetImage("assets/images/start_route_marker.png"));
+// типы точек: 1 - без типа (по умолчанию), 2 - архитектура, 3 - природа, 4 - памятники, 5 - легенды и истории
+const markersPaths = ["unknown.png", "intresting_place.png", "architect.png", "nature.png", "monument.png", "legends.png"];
+final markersImgs = [
+  for (var marker in markersPaths)
+  image_provider.ImageProvider.fromImageProvider(fl_material.AssetImage("assets/icons/markers/$marker"))
+];
+final startRouteMarker = image_provider.ImageProvider.fromImageProvider(const fl_material.AssetImage("assets/icons/markers/start_route_marker.png"));
 
 void continueLogic() {
   if (tappedMarker.value != null && tappedMarker.value!.isChecked == 0) {
@@ -131,22 +133,8 @@ void removeUnknownPoint(MarkerMap marker) {
 }
 
 void addPoint(MarkerMap marker) {
-  image_provider.ImageProvider? img;
-
-  if (marker.isChecked == 0){
-        img = unknownMarker;
-      }
-      else {
-        switch(marker.typePoint){
-          case(1):
-            img = monumentMarker;
-            break;
-          case(2):
-            img = intrestPlaceMarker;
-            break;
-        }
-      }
-      markerCollections!.addPlacemarkWithImage(Point(latitude: marker.latitude, longitude: marker.longitude), img!);
+  final img = marker.isChecked == 0 ? markersImgs[0]: markersImgs[marker.typePoint];
+  markerCollections!.addPlacemarkWithImage(Point(latitude: marker.latitude, longitude: marker.longitude), img);
 }
 
 Future<void> makePoints(MapWindow mapWindow_) async {
