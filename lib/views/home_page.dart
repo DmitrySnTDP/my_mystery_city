@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:my_mystery_city/views/map_page.dart';
+import 'categories_page.dart';
 
 class MyHomePage extends StatefulWidget {
 
@@ -34,7 +35,7 @@ class _MyHomePageState extends State<MyHomePage> {
         page = MapPage();
         break;
       case 1:
-        page = Placeholder(color: Colors.red,);
+        page = CategoriesPage();
         break;
       case 2:
         page = Placeholder(color: Colors.yellow,);
