@@ -16,7 +16,7 @@ class CategoriesPage extends StatelessWidget {
             children: [
               SizedBox(
                 width: 375,
-                height: 150,
+                height: 190,
                 child: ElevatedButton(
                   onPressed: () {},
                   style: ElevatedButton.styleFrom(
