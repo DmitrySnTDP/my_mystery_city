@@ -53,6 +53,7 @@ Future<void> createFillTable() async {
   createTable();
   database = await openDatabase(join(await getDatabasesPath(), "assets/db/db_local.db"));
   var markers = await readMarkersFromJson("assets/db/points.json");
+  // var markers = await readMarkersFromJson("assets/db/new_genetated_points.json");
   for (var i = 0; i < markers.length ; i++)
   {
     insertMarker(markers[i]);

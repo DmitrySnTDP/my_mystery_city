@@ -10,8 +10,8 @@ class ClusterView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 40,
-      height: 40,
+      width: 35,
+      height: 35,
       decoration: BoxDecoration(
         color: color,
         shape: BoxShape.circle,

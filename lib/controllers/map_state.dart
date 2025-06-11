@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:core';
-import 'dart:core' as dart_core;
 
 import 'package:flutter/material.dart' as fl_material;
 import 'package:geolocator/geolocator.dart';
@@ -18,12 +17,14 @@ Position? userPosition;
 PlacemarkMapObject? userLocationPlacemark;
 ClusterizedPlacemarkCollection? markerCollections;
 final fl_material.ValueNotifier<MarkerMap?> tappedMarker = fl_material.ValueNotifier(null);
+final fl_material.ValueNotifier<int?> showRouteNum = fl_material.ValueNotifier(null);
 
 final MapObjectTapListenerImpl tabMarkerListener = MapObjectTapListenerImpl(onMapObjectTapped:
   (mapObject , point ) {
     if (mapObject is PlacemarkMapObject) {
       getMarkerMap(mapObject.geometry.latitude, mapObject.geometry.longitude).then((marker) {
         tappedMarker.value = marker;
+        showRouteNum.value = null;
       continueLogic();
       });  
     }
@@ -38,7 +39,6 @@ final markersImgs = [
   for (var marker in markersPaths)
   image_provider.ImageProvider.fromImageProvider(fl_material.AssetImage("assets/icons/markers/$marker"))
 ];
-final startRouteMarker = image_provider.ImageProvider.fromImageProvider(const fl_material.AssetImage("assets/icons/markers/start_route_marker.png"));
 
 void continueLogic() {
   if (tappedMarker.value != null && tappedMarker.value!.isChecked == 0) {
@@ -145,5 +145,5 @@ Future<void> makePoints(MapWindow mapWindow_) async {
       addPoint(marker);
     }
     markerCollections!.addTapListener(tabMarkerListener);
-    markerCollections!.clusterPlacemarks(clusterRadius: 60.0, minZoom: 15);
+    markerCollections!.clusterPlacemarks(clusterRadius: 25.0, minZoom: 15);
 }

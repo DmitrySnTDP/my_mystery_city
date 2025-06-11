@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:my_mystery_city/views/map_page.dart';
 import 'categories_page.dart';
 
+const orangeColor = Color.fromRGBO(246, 135, 99, 1);
+
+
 class MyHomePage extends StatefulWidget {
 
   const MyHomePage({super.key, required this.title});
@@ -13,7 +16,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   var selectedIndex = 0;
-  final colorOnClick = Color.fromRGBO(246, 135, 99, 1);
+  final colorOnClick = orangeColor;
   // final gradientColor = ShaderMask(
   // shaderCallback: (Rect bounds) {
   //   return LinearGradient(
@@ -32,10 +35,10 @@ class _MyHomePageState extends State<MyHomePage> {
     Widget page = Placeholder();
     switch (selectedIndex) {
       case 0:
-        page = MapPage();
+        page = CategoriesPage();
         break;
       case 1:
-        page = CategoriesPage();
+        page = MapPage();
         break;
       case 2:
         page = Placeholder(color: Colors.green,);
@@ -67,21 +70,21 @@ class _MyHomePageState extends State<MyHomePage> {
                       ? FontWeight.bold
                       : FontWeight.normal,
                   color: states.contains(WidgetState.selected)
-                      ? Color.fromRGBO(246, 135, 99, 1)
+                      ? orangeColor
                       : Color.fromRGBO(51, 51, 51, 1),
                 );
               }),
               selectedIndex: selectedIndex,
               destinations: <Widget>[
                 NavigationDestination(
-                  selectedIcon: ImageIcon(const AssetImage("assets/icons/map.png"), color: colorOnClick),
-                  icon: const ImageIcon(AssetImage('assets/icons/map.png')),
-                  label: 'Карта',
-                ),
-                NavigationDestination(
                   selectedIcon: ImageIcon(const AssetImage("assets/icons/routes.png"), color: colorOnClick),
                   icon: const ImageIcon(AssetImage('assets/icons/routes.png')),
                   label: 'Категории',
+                ),
+                NavigationDestination(
+                  selectedIcon: ImageIcon(const AssetImage("assets/icons/map.png"), color: colorOnClick),
+                  icon: const ImageIcon(AssetImage('assets/icons/map.png')),
+                  label: 'Карта',
                 ),
                 NavigationDestination(
                   selectedIcon: ImageIcon(const AssetImage("assets/icons/profile.png"), color: colorOnClick),
