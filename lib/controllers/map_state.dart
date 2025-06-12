@@ -3,6 +3,7 @@ import 'dart:core';
 
 import 'package:flutter/material.dart' as fl_material;
 import 'package:geolocator/geolocator.dart';
+import 'package:my_mystery_city/controllers/search_nearest_place.dart';
 
 import 'package:my_mystery_city/views/map_page.dart';
 import 'package:my_mystery_city/data/db_worker.dart';
@@ -146,4 +147,30 @@ Future<void> makePoints(MapWindow mapWindow_) async {
     }
     markerCollections!.addTapListener(tabMarkerListener);
     markerCollections!.clusterPlacemarks(clusterRadius: 25.0, minZoom: 15);
+}
+
+Future<void> showNearPlace() async {
+  const double radiusSearch = 2000; //радиус поиска в метрах
+  final nearPoint = await getNearPointInRadius(
+    radiusSearch, 
+    Point(
+      latitude: userLocationPlacemark!.geometry.latitude,
+      longitude: userLocationPlacemark!.geometry.longitude,
+    )
+  );
+  if (nearPoint != null) {
+    tappedMarker.value = nearPoint;
+    mapWindow_!.map.moveWithAnimation(
+      CameraPosition(
+        Point(latitude: nearPoint.latitude, longitude:  nearPoint.longitude),
+        zoom: 16,
+        azimuth: 0.0,
+        tilt: 30.0
+      ),
+      Animation(
+        AnimationType.Smooth,
+        duration: 0.5,
+      )
+    );
+  }
 }

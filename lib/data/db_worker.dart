@@ -1,7 +1,9 @@
 import 'package:my_mystery_city/data/reader_json.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
+import 'package:yandex_maps_mapkit/mapkit.dart' as mapkit;
 
+// late Map<(double, double), MarkerMap> sortSectorsMarkers;
 Database? database;
 
 Future<List<MarkerMap>> getData() async {
@@ -20,10 +22,28 @@ class MarkerMap {
   final String shortDescription;
   final String imgLink;
 
-  MarkerMap({required this.latitude, required this.longitude, required this.typePoint, required this.isChecked, required this.name, required this.description, required this.shortDescription, required this.imgLink});
+  MarkerMap({
+    required this.latitude,
+    required this.longitude,
+    required this.typePoint,
+    required this.isChecked,
+    required this.name,
+    required this.description,
+    required this.shortDescription,
+    required this.imgLink
+  });
 
   Map<String, Object?> toMap() {
-    return {'latitude': latitude, 'longitude': longitude, 'type_point': typePoint, 'is_checked': isChecked, 'name': name, 'description': description, 'short_description':shortDescription, 'img_link': imgLink};
+    return {
+      'latitude': latitude,
+      'longitude': longitude,
+      'type_point': typePoint,
+      'is_checked': isChecked,
+      'name': name,
+      'description': description,
+      'short_description':shortDescription,
+      'img_link': imgLink
+    };
   }
 
   factory MarkerMap.fromJson(Map<String, dynamic> json) {
@@ -40,6 +60,10 @@ class MarkerMap {
   }
 }
 
+// Future<void> cachedPoint() async {
+  // get
+// }
+
 Future<void> checkDB() async {
   var path = join(await getDatabasesPath(), "assets/db/db_local.db");
   var exists = await databaseExists(path);
@@ -53,10 +77,9 @@ Future<void> createFillTable() async {
   createTable();
   database = await openDatabase(join(await getDatabasesPath(), "assets/db/db_local.db"));
   var markers = await readMarkersFromJson("assets/db/points.json");
-  // var markers = await readMarkersFromJson("assets/db/new_genetated_points.json");
-  for (var i = 0; i < markers.length ; i++)
+  for (var marker in markers)
   {
-    insertMarker(markers[i]);
+    insertMarker(marker);
   }
 }
 
@@ -88,7 +111,16 @@ Future<List<MarkerMap>> getMarkersMap() async {
       'img_link' : imgLink as String,
     } in markersMaps)
       
-      MarkerMap(latitude: latitude, longitude: longitude, typePoint: typePoint, isChecked: isChecked, name: name, description: description, shortDescription: shortDescription, imgLink: imgLink),
+      MarkerMap(
+        latitude: latitude,
+        longitude: longitude,
+        typePoint: typePoint,
+        isChecked: isChecked,
+        name: name,
+        description: description,
+        shortDescription: shortDescription, 
+        imgLink: imgLink
+      ),
   ];
 }
 
@@ -120,6 +152,20 @@ Future<void> updateMarkerMapExploreStatus(MarkerMap marker) async {
     where: 'latitude = ? AND longitude = ?',
     whereArgs: [marker.latitude, marker.longitude],
   );
+}
+
+Future<List<MarkerMap>> getMarkerMapInRadius(mapkit.Point userPoint, double dLatitude, double dLongitude) async {
+  final db = database!;
+  List<MarkerMap> markers = [];
+  final markersData = await db.query(
+    'markers_data',
+    where: 'latitude > ? AND latitude < ? AND longitude > ? and longitude < ? AND is_checked = ?',
+    whereArgs: [userPoint.latitude - dLatitude, userPoint.latitude + dLatitude, userPoint.longitude - dLongitude, userPoint.longitude + dLongitude, 0],
+  );
+  for (var data in markersData) {
+    markers.add(MarkerMap.fromJson(data));
+  }
+  return markers;
 }
 
 Future<MarkerMap?> getMarkerMap(double latitude, double longitude) async {

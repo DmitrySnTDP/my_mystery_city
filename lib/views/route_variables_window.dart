@@ -22,7 +22,7 @@ class RouteOverlay extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: EdgeInsets.only(top: 600),
+      margin: EdgeInsets.only(top: MediaQuery.of(context).size.height * 0.65),
       decoration: const BoxDecoration(
         color: Color.fromRGBO(247, 245, 242, 1),
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
@@ -83,7 +83,7 @@ List<Widget> getVariablesRoute(List<MasstransitRoute> routes, Function callBackF
       ),
     ),
     minimumSize: WidgetStatePropertyAll(
-      Size((MediaQuery.of(context).size.width / routes.length) - 35, 50)
+      Size((MediaQuery.of(context).size.width / routes.length) - 40, 50)
     )
   );
 

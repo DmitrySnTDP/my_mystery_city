@@ -1,16 +1,16 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' ;
 // import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';
 import 'dart:async';
 
 import 'package:my_mystery_city/controllers/map_state.dart';
 import 'package:my_mystery_city/controllers/root-creater.dart';
-// import 'package:my_mystery_city/data/db_worker.dart';
 import 'package:my_mystery_city/data/reader_json.dart';
+import 'package:my_mystery_city/views/home_page.dart';
 import 'package:my_mystery_city/views/point_window_on_map.dart';
 import 'package:my_mystery_city/views/route_variables_window.dart';
 
-import 'package:yandex_maps_mapkit/mapkit.dart' hide LocationSettings;
+import 'package:yandex_maps_mapkit/mapkit.dart' hide LocationSettings, TextStyle;
 import 'package:yandex_maps_mapkit/mapkit_factory.dart';
 import 'package:yandex_maps_mapkit/yandex_map.dart';
 
@@ -99,7 +99,8 @@ class _MapPageState extends State<MapPage> {
           Positioned(
             bottom: 50,
             right: 0,
-            child: ElevatedButton(
+            child: 
+            ElevatedButton(
               onPressed: () {
                 moveToUserLocation(mapWindow_);
               },
@@ -108,6 +109,44 @@ class _MapPageState extends State<MapPage> {
               ),
               child: Icon(Icons.near_me),
             ),
+          ),
+          Positioned(
+            bottom: 0,
+            right: 10,
+            child: 
+            TextButton(
+              onPressed: () async {
+                await showNearPlace();
+              },
+              style: ButtonStyle(
+                backgroundColor: WidgetStatePropertyAll(Colors.white),
+                shape: WidgetStateProperty.all(
+                RoundedRectangleBorder(
+                  side: BorderSide(color: orangeColor, width: 2),
+                  
+                  borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+              ),
+              child: Text(
+                "Ближайшее место",
+                style: TextStyle(
+                  color: orangeColor,
+                ),
+              )
+            ),
+            // если передумаем заменить на кнопку со значком просто
+
+            // ElevatedButton(
+            //   onPressed: () {},
+            //   style: ElevatedButton.styleFrom(
+            //     backgroundColor: orangeColor,
+            //     iconColor: Colors.white,
+            //     shape: CircleBorder(),
+            //     iconSize: 20,
+            //   ),
+            //   child: Icon(Icons.search),
+            // ),
           ),
           if (tappedMarker.value != null) 
             MarkerOverlay(
