@@ -19,6 +19,7 @@ PlacemarkMapObject? userLocationPlacemark;
 ClusterizedPlacemarkCollection? markerCollections;
 final fl_material.ValueNotifier<MarkerMap?> tappedMarker = fl_material.ValueNotifier(null);
 final fl_material.ValueNotifier<int?> showRouteNum = fl_material.ValueNotifier(null);
+final fl_material.ValueNotifier<bool> showMoreInfoCheck = fl_material.ValueNotifier(false);
 
 final MapObjectTapListenerImpl tabMarkerListener = MapObjectTapListenerImpl(onMapObjectTapped:
   (mapObject , point ) {

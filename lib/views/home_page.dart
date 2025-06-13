@@ -6,17 +6,15 @@ const orangeColor = Color.fromRGBO(246, 135, 99, 1);
 
 
 class MyHomePage extends StatefulWidget {
-
-  const MyHomePage({super.key, required this.title});
-  final String title;
-
+  const MyHomePage({super.key,s});
+  
   @override
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> {
   var selectedIndex = 0;
-  final colorOnClick = orangeColor;
+
   // final gradientColor = ShaderMask(
   // shaderCallback: (Rect bounds) {
   //   return LinearGradient(
@@ -27,6 +25,14 @@ class _MyHomePageState extends State<MyHomePage> {
   //   },
   //   child: Icon(Icons.settings),
   // );
+
+  void setSelectedIndex(int newIndex) {
+    if (newIndex >= 0 && newIndex <= 2) {
+      setState(() {
+        selectedIndex = newIndex;
+      });
+    }
+  }
 
 
   @override
@@ -77,17 +83,17 @@ class _MyHomePageState extends State<MyHomePage> {
               selectedIndex: selectedIndex,
               destinations: <Widget>[
                 NavigationDestination(
-                  selectedIcon: ImageIcon(const AssetImage("assets/icons/routes.png"), color: colorOnClick),
+                  selectedIcon: ImageIcon(const AssetImage("assets/icons/routes.png"), color: orangeColor),
                   icon: const ImageIcon(AssetImage('assets/icons/routes.png')),
                   label: 'Категории',
                 ),
                 NavigationDestination(
-                  selectedIcon: ImageIcon(const AssetImage("assets/icons/map.png"), color: colorOnClick),
+                  selectedIcon: ImageIcon(const AssetImage("assets/icons/map.png"), color: orangeColor),
                   icon: const ImageIcon(AssetImage('assets/icons/map.png')),
                   label: 'Карта',
                 ),
                 NavigationDestination(
-                  selectedIcon: ImageIcon(const AssetImage("assets/icons/profile.png"), color: colorOnClick),
+                  selectedIcon: ImageIcon(const AssetImage("assets/icons/profile.png"), color: orangeColor),
                   icon: const ImageIcon(AssetImage('assets/icons/profile.png')),
                   label: 'Профиль',
                 ),

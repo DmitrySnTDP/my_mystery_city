@@ -7,12 +7,14 @@ class MarkerOverlay extends StatelessWidget {
   final MarkerMap marker;
   final VoidCallback onClose;
   final VoidCallback onCreateRoot;
+  final Function moreInfoFunc;
 
   const MarkerOverlay({
     super.key,
     required this.marker,
     required this.onClose,
     required this.onCreateRoot,
+    required this.moreInfoFunc,
     }
   );
 
@@ -67,7 +69,7 @@ class MarkerOverlay extends StatelessWidget {
                   Padding(
                     padding: const EdgeInsets.all(18.0),
                     child: Column(
-                      children: getText(marker)
+                      children: getText(marker, moreInfoFunc)
                     ),
                   ),
                 ],
@@ -80,7 +82,7 @@ class MarkerOverlay extends StatelessWidget {
   }
 
 
-  List<Widget> getText(MarkerMap marker){
+  List<Widget> getText(MarkerMap marker, Function moreInfoFunc){
     var shortDescription = marker.shortDescription;
     if (shortDescription == "") {
       final sentenses = marker.description.split(". ");
@@ -134,7 +136,7 @@ class MarkerOverlay extends StatelessWidget {
                         Flexible(
                           flex: 4,
                           child: TextButton(
-                            onPressed: null,
+                            onPressed: () {moreInfoFunc();},
                             style: ButtonStyle(
                                padding: WidgetStateProperty.all(EdgeInsets.zero),
                               minimumSize: WidgetStateProperty.all(Size.zero),
@@ -158,6 +160,25 @@ class MarkerOverlay extends StatelessWidget {
                 )
               )
             ],
+          ),
+        ),
+        Padding(
+          padding: EdgeInsets.only(left: 16, right: 16, top: 17, bottom: 0),
+          child: TextButton(
+            onPressed: onCreateRoot,
+            style: ButtonStyle(
+              backgroundColor: WidgetStateProperty.all(orangeColor),
+              shape: WidgetStateProperty.all(
+                RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+            padding: WidgetStatePropertyAll(EdgeInsets.only(left: 65.5, right: 65.5, top: 14.5, bottom: 14.5)),
+            ),
+            child: Text(
+              "Составить маршрут",
+              style: TextStyle(fontSize: 19, color: Colors.white),
+            ),
           ),
         ),
       ];

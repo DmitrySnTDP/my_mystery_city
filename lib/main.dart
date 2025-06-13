@@ -24,7 +24,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'My mystery city',
       theme: ThemeData(colorSchemeSeed: Colors.white),
-      home: const MyHomePage(title: 'My Mystery City'),
+      home: MyHomePage(),
     );
   }
 }
