@@ -1,9 +1,9 @@
 import 'dart:async';
 import 'dart:core';
-import 'dart:core' as dart_core;
 
 import 'package:flutter/material.dart' as fl_material;
 import 'package:geolocator/geolocator.dart';
+import 'package:my_mystery_city/controllers/search_nearest_place.dart';
 
 import 'package:my_mystery_city/views/map_page.dart';
 import 'package:my_mystery_city/data/db_worker.dart';
@@ -18,12 +18,15 @@ Position? userPosition;
 PlacemarkMapObject? userLocationPlacemark;
 ClusterizedPlacemarkCollection? markerCollections;
 final fl_material.ValueNotifier<MarkerMap?> tappedMarker = fl_material.ValueNotifier(null);
+final fl_material.ValueNotifier<int?> showRouteNum = fl_material.ValueNotifier(null);
+final fl_material.ValueNotifier<bool> showMoreInfoCheck = fl_material.ValueNotifier(false);
 
 final MapObjectTapListenerImpl tabMarkerListener = MapObjectTapListenerImpl(onMapObjectTapped:
   (mapObject , point ) {
     if (mapObject is PlacemarkMapObject) {
       getMarkerMap(mapObject.geometry.latitude, mapObject.geometry.longitude).then((marker) {
         tappedMarker.value = marker;
+        showRouteNum.value = null;
       continueLogic();
       });  
     }
@@ -38,7 +41,6 @@ final markersImgs = [
   for (var marker in markersPaths)
   image_provider.ImageProvider.fromImageProvider(fl_material.AssetImage("assets/icons/markers/$marker"))
 ];
-final startRouteMarker = image_provider.ImageProvider.fromImageProvider(const fl_material.AssetImage("assets/icons/markers/start_route_marker.png"));
 
 void continueLogic() {
   if (tappedMarker.value != null && tappedMarker.value!.isChecked == 0) {
@@ -145,5 +147,31 @@ Future<void> makePoints(MapWindow mapWindow_) async {
       addPoint(marker);
     }
     markerCollections!.addTapListener(tabMarkerListener);
-    markerCollections!.clusterPlacemarks(clusterRadius: 60.0, minZoom: 15);
+    markerCollections!.clusterPlacemarks(clusterRadius: 25.0, minZoom: 15);
+}
+
+Future<void> showNearPlace() async {
+  const double radiusSearch = 2000; //радиус поиска в метрах
+  final nearPoint = await getNearPointInRadius(
+    radiusSearch, 
+    Point(
+      latitude: userLocationPlacemark!.geometry.latitude,
+      longitude: userLocationPlacemark!.geometry.longitude,
+    )
+  );
+  if (nearPoint != null) {
+    tappedMarker.value = nearPoint;
+    mapWindow_!.map.moveWithAnimation(
+      CameraPosition(
+        Point(latitude: nearPoint.latitude, longitude:  nearPoint.longitude),
+        zoom: 16,
+        azimuth: 0.0,
+        tilt: 30.0
+      ),
+      Animation(
+        AnimationType.Smooth,
+        duration: 0.5,
+      )
+    );
+  }
 }

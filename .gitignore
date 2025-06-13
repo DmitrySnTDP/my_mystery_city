@@ -46,3 +46,4 @@ app.*.map.json
 
 # local files
 lib/_mapkit_key.dart
+g_table_worker/

@@ -8,6 +8,7 @@ import '_mapkit_key.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   checkDB();
+  // cachedPoint();
   init.initMapkit(
     apiKey: mapkitApiKey,
     locale: "ru_RU"
@@ -23,7 +24,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'My mystery city',
       theme: ThemeData(colorSchemeSeed: Colors.white),
-      home: const MyHomePage(title: 'My Mystery City'),
+      home: MyHomePage(),
     );
   }
 }
