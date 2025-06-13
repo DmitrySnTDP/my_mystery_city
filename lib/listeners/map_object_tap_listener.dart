@@ -7,7 +7,6 @@ final class MapObjectTapListenerImpl implements MapObjectTapListener {
 
   @override
   bool onMapObjectTap(MapObject mapObject, Point point) {
-    print("Tapped the placemark: Point(latitude: ${point.latitude}, longitude: ${point.longitude})");
     return onMapObjectTapped(mapObject, point);
   }
 }
