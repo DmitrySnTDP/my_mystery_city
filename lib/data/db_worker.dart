@@ -1,9 +1,10 @@
 import 'package:my_mystery_city/data/reader_json.dart';
+import 'package:my_mystery_city/enums/type_point_enum.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import 'package:yandex_maps_mapkit/mapkit.dart' as mapkit;
 
-// late Map<(double, double), MarkerMap> sortSectorsMarkers;
+
 Database? database;
 
 Future<List<MarkerMap>> getData() async {
@@ -15,11 +16,11 @@ Future<List<MarkerMap>> getData() async {
 class MarkerMap {
   final double latitude;
   final double longitude;
-  final int typePoint;
+  final TypePoint typePoint;
   int isChecked;
   final String name;
   final String description;
-  final String shortDescription;
+  final String routeName;
   final String imgLink;
 
   MarkerMap({
@@ -29,7 +30,7 @@ class MarkerMap {
     required this.isChecked,
     required this.name,
     required this.description,
-    required this.shortDescription,
+    required this.routeName,
     required this.imgLink
   });
 
@@ -37,11 +38,11 @@ class MarkerMap {
     return {
       'latitude': latitude,
       'longitude': longitude,
-      'type_point': typePoint,
+      'type_point': typePoint.indexType,
       'is_checked': isChecked,
       'name': name,
       'description': description,
-      'short_description':shortDescription,
+      'route_name': routeName,
       'img_link': imgLink
     };
   }
@@ -50,19 +51,15 @@ class MarkerMap {
     return MarkerMap(
       latitude: json["latitude"],
       longitude: json["longitude"],
-      typePoint: json["type_point"],
+      typePoint: getTypePoint(json["type_point"]),
       isChecked: json["is_checked"],
       name: json["name"],
       description: json["description"], 
-      shortDescription: json["short_description"],
+      routeName: json["route_name"],
       imgLink: json["img_link"],
     );
   }
 }
-
-// Future<void> cachedPoint() async {
-  // get
-// }
 
 Future<void> checkDB() async {
   var path = join(await getDatabasesPath(), "assets/db/db_local.db");
@@ -88,7 +85,7 @@ Future<void>createTable() async {
   var database_ = openDatabase(join(await getDatabasesPath(), "assets/db/db_local.db"),
     onCreate: (db, version) {
       return db.execute(
-        'CREATE TABLE markers_data (latitude REAL NOT NULL, longitude	REAL NOT NULL, type_point	INTEGER NOT NULL DEFAULT 1 CHECK(type_point >= 1 AND type_point <= 5), is_checked	BLOB NOT NULL, name	TEXT,	description	TEXT, short_description TEXT, img_link TEXT,	PRIMARY KEY(latitude, longitude))',
+        'CREATE TABLE markers_data (latitude REAL NOT NULL, longitude	REAL NOT NULL, type_point	INTEGER NOT NULL DEFAULT 1 CHECK(type_point >= 1 AND type_point <= 5), is_checked	BLOB NOT NULL, name	TEXT,	description	TEXT, route_name TEXT, img_link TEXT,	PRIMARY KEY(latitude, longitude))',
       );
     },
     version: 1,
@@ -107,18 +104,18 @@ Future<List<MarkerMap>> getMarkersMap() async {
       'is_checked': isChecked as int,
       'name': name as String,
       'description': description as String,
-      'short_description' : shortDescription as String,
+      'route_name' : routeName as String,
       'img_link' : imgLink as String,
     } in markersMaps)
       
       MarkerMap(
         latitude: latitude,
         longitude: longitude,
-        typePoint: typePoint,
+        typePoint: getTypePoint(typePoint),
         isChecked: isChecked,
         name: name,
         description: description,
-        shortDescription: shortDescription, 
+        routeName: routeName, 
         imgLink: imgLink
       ),
   ];
@@ -181,4 +178,21 @@ Future<MarkerMap?> getMarkerMap(double latitude, double longitude) async {
     return MarkerMap.fromJson(markerData);
   }
   return null;
+}
+
+TypePoint getTypePoint(int data) {
+  switch (data){
+    case(1):
+      return TypePoint.intrestingPlace;
+    case(2):
+      return TypePoint.architecture;
+    case(3):
+      return TypePoint.nature;
+    case(4):
+      return TypePoint.monument;
+    case(5): 
+      return TypePoint.legends;
+    default:
+      return TypePoint.intrestingPlace;
+  }
 }

@@ -135,7 +135,7 @@ void removeUnknownPoint(MarkerMap marker) {
 }
 
 void addPoint(MarkerMap marker) {
-  final img = marker.isChecked == 0 ? markersImgs[0]: markersImgs[marker.typePoint];
+  final img = marker.isChecked == 0 ? markersImgs[0]: markersImgs[marker.typePoint.indexType];
   markerCollections!.addPlacemarkWithImage(Point(latitude: marker.latitude, longitude: marker.longitude), img);
 }
 

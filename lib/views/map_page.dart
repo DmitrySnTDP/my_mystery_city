@@ -46,7 +46,6 @@ class _MapPageState extends State<MapPage> {
     };
     tappedMarker.addListener(_listener!);
     showRouteNum.addListener(_listener!);
-    showMoreInfoCheck.addListener(_listener!);
 
     _positionStream = Geolocator.getPositionStream(
       locationSettings: const LocationSettings(
@@ -72,7 +71,6 @@ class _MapPageState extends State<MapPage> {
     _positionStream.cancel();
     tappedMarker.removeListener(_listener!);
     showRouteNum.removeListener(_listener!);
-    showMoreInfoCheck.removeListener(_listener!);
     routeManager.cancelAllSessions();
     super.dispose();
   }
@@ -100,7 +98,7 @@ class _MapPageState extends State<MapPage> {
             },
           ),
           Positioned(
-            bottom: 50,
+            bottom: 0,
             right: 0,
             child: 
             ElevatedButton(
@@ -114,42 +112,42 @@ class _MapPageState extends State<MapPage> {
             ),
           ),
           Positioned(
-            bottom: 0,
-            right: 10,
+            bottom: 50,
+            right: 0,
             child: 
-            TextButton(
+            // TextButton(
+            //   onPressed: () async {
+            //     await showNearPlace();
+            //   },
+            //   style: ButtonStyle(
+            //     backgroundColor: WidgetStatePropertyAll(Colors.white),
+            //     shape: WidgetStateProperty.all(
+            //     RoundedRectangleBorder(
+            //       side: BorderSide(color: orangeColor, width: 2),
+                  
+            //       borderRadius: BorderRadius.circular(10),
+            //       ),
+            //     ),
+            //   ),
+            //   child: Text(
+            //     "Ближайшее место",
+            //     style: TextStyle(
+            //       color: orangeColor,
+            //     ),
+            //   )
+            // ),
+            ElevatedButton(
               onPressed: () async {
                 await showNearPlace();
               },
-              style: ButtonStyle(
-                backgroundColor: WidgetStatePropertyAll(Colors.white),
-                shape: WidgetStateProperty.all(
-                RoundedRectangleBorder(
-                  side: BorderSide(color: orangeColor, width: 2),
-                  
-                  borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: orangeColor,
+                iconColor: Colors.white,
+                shape: CircleBorder(),
+                iconSize: 20,
               ),
-              child: Text(
-                "Ближайшее место",
-                style: TextStyle(
-                  color: orangeColor,
-                ),
-              )
+              child: Icon(Icons.search),
             ),
-            // если передумаем заменить на кнопку со значком просто
-
-            // ElevatedButton(
-            //   onPressed: () {},
-            //   style: ElevatedButton.styleFrom(
-            //     backgroundColor: orangeColor,
-            //     iconColor: Colors.white,
-            //     shape: CircleBorder(),
-            //     iconSize: 20,
-            //   ),
-            //   child: Icon(Icons.search),
-            // ),
           ),
           if (tappedMarker.value != null) 
             MarkerOverlay(
@@ -177,7 +175,7 @@ class _MapPageState extends State<MapPage> {
                 }
               },
               moreInfoFunc: () {
-                showMoreInfoCheck.value = true;
+                openMoreInfo(context, tappedMarker.value!);
               },
             ),
           if (showRouteNum.value != null)
@@ -196,15 +194,6 @@ class _MapPageState extends State<MapPage> {
                 );
               }
             ),
-          if (showMoreInfoCheck.value && tappedMarker.value != null)
-            MoreInfoPointPage(
-              point: tappedMarker.value!,
-              onClose: () {
-                setState(() {
-                  showMoreInfoCheck.value = false;
-                });
-              },
-            ) 
           ],
         ),
       ),

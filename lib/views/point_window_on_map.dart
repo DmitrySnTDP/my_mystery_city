@@ -34,7 +34,6 @@ class MarkerOverlay extends StatelessWidget {
           return NotificationListener<DraggableScrollableNotification>(
             onNotification: (notification) {
               if (notification.extent <= 0.1) {
-                // tappedMarker = null;
                 onClose();
                 return true;
               }
@@ -83,12 +82,9 @@ class MarkerOverlay extends StatelessWidget {
 
 
   List<Widget> getText(MarkerMap marker, Function moreInfoFunc){
-    var shortDescription = marker.shortDescription;
-    if (shortDescription == "") {
-      final sentenses = marker.description.split(". ");
-      shortDescription = sentenses.getRange(0, 2).join(". ");
-      shortDescription += '.';
-    } 
+    final sentenses = marker.description.split(". ");
+    var shortDescription = sentenses.getRange(0, 2).join(". ");
+    shortDescription += '.';
     if (marker.isChecked == 1) {
       return [
         Container(
