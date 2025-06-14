@@ -83,7 +83,11 @@ class MarkerOverlay extends StatelessWidget {
 
   List<Widget> getText(MarkerMap marker, Function moreInfoFunc){
     final sentenses = marker.description.split(". ");
-    var shortDescription = sentenses.getRange(0, 2).join(". ");
+    var shortDescription = marker.description;
+    if (sentenses.length > 2) {
+      shortDescription = sentenses.getRange(0, 2).join(". ");
+    }
+    
     shortDescription += '.';
     if (marker.isChecked == 1) {
       return [
@@ -99,7 +103,7 @@ class MarkerOverlay extends StatelessWidget {
                   Radius.circular(10),
                 ),
                 child: Image(
-                  image: AssetImage(marker.imgLink),
+                  image: AssetImage(marker.imgLink[0]),
                   fit: BoxFit.fitWidth,
                 ),
               ),
@@ -169,7 +173,7 @@ class MarkerOverlay extends StatelessWidget {
                   borderRadius: BorderRadius.circular(10),
                 ),
               ),
-            padding: WidgetStatePropertyAll(EdgeInsets.only(left: 65.5, right: 65.5, top: 14.5, bottom: 14.5)),
+            padding: WidgetStatePropertyAll(EdgeInsets.symmetric(horizontal: 65.5, vertical: 14.5)),
             ),
             child: Text(
               "Составить маршрут",
@@ -209,7 +213,7 @@ class MarkerOverlay extends StatelessWidget {
                   borderRadius: BorderRadius.circular(10),
                 ),
               ),
-            padding: WidgetStatePropertyAll(EdgeInsets.only(left: 65.5, right: 65.5, top: 14.5, bottom: 14.5)),
+            padding: WidgetStatePropertyAll(EdgeInsets.symmetric(horizontal: 65.5, vertical: 14.5)),
             ),
             child: Text(
               "Составить маршрут",

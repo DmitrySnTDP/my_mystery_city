@@ -21,7 +21,7 @@ class MarkerMap {
   final String name;
   final String description;
   final String routeName;
-  final String imgLink;
+  final List<String> imgLink;
 
   MarkerMap({
     required this.latitude,
@@ -43,7 +43,7 @@ class MarkerMap {
       'name': name,
       'description': description,
       'route_name': routeName,
-      'img_link': imgLink
+      'img_link': imgLink.join(" ")
     };
   }
 
@@ -56,7 +56,7 @@ class MarkerMap {
       name: json["name"],
       description: json["description"], 
       routeName: json["route_name"],
-      imgLink: json["img_link"],
+      imgLink: json["img_link"].split(" "),
     );
   }
 }
@@ -116,7 +116,7 @@ Future<List<MarkerMap>> getMarkersMap() async {
         name: name,
         description: description,
         routeName: routeName, 
-        imgLink: imgLink
+        imgLink: imgLink.split(" ")
       ),
   ];
 }
