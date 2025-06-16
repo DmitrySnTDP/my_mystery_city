@@ -233,11 +233,24 @@ class CategoryDetailsPage extends StatelessWidget {
         break;
     }
 
+    //final items = _getItemsForCategory();
+
     return Scaffold(
       appBar: AppBar(title: Text(title)),
-      body: Center(
-        child: Text(title),
-      ),
+      body: ListView.builder(
+        padding: const EdgeInsets.all(16),
+        itemCount: 3,
+        itemBuilder: (context, index) {
+          return Card(
+            margin: const EdgeInsets.symmetric(vertical: 8),
+            child: ListTile(
+              //title: Text(items[index]),
+              title: Text("test"),
+              // onTap etc.
+            ),
+          );
+        },
+      )
     );
   }
 }
