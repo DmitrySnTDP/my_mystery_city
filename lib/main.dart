@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:my_mystery_city/views/categories_page.dart';
 import 'package:yandex_maps_mapkit/init.dart' as init;
 import 'views/home_page.dart';
 import 'data/db_worker.dart';
@@ -8,6 +9,7 @@ import '_mapkit_key.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   checkDB();
+  getPoints();
   init.initMapkit(
     apiKey: mapkitApiKey,
     locale: "ru_RU"

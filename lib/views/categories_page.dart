@@ -1,5 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:my_mystery_city/enums/categories_enum.dart';
+import 'package:my_mystery_city/data/db_worker.dart';
+import 'package:my_mystery_city/enums/type_point_enum.dart';
+import 'package:my_mystery_city/views/more_info_point_page.dart';
+
+List<MarkerMap> allMarkers = [];
+List<MarkerMap> architectureMarkers = [];
+List<MarkerMap> natureMarkers = [];
+List<MarkerMap> monumentMarkers = [];
+List<MarkerMap> historyMarkers = [];
+
+var routesText = ["Маршруты", "Без описания."];
+var architectureText = ["Архитектура Екатеринбурга", "Город — это музей под открытым небом. Исследуй шедевры разных эпох: от барокко до конструктивизма."];
+var natureText = ["Природа Екатеринбурга", "Открой зелёную сторону города — от лесопарков и озёр до скрытых троп и панорамных видов. Природа Екатеринбурга удивляет даже среди городского ритма."];
+var memorialText = ["Памятники Екатеринбурга", "Каждая скульптура — это история, застывшая в металле и камне. Прогуляйся по городу и узнай, кому и чему посвящены самые необычные и знаковые памятники Екатеринбурга."];
+var historyText = ["Истории и легенды", "Улицы Екатеринбурга хранят тайны, мифы и удивительные события. Погрузись в атмосферу прошлого — от купеческих тайн до городских мистических историй."];
 
 class CategoriesPage extends StatelessWidget {
   const CategoriesPage({super.key});
@@ -58,7 +73,7 @@ class CategoriesPage extends StatelessWidget {
                   ),
                 ),
               ),
-              SizedBox(height: 15,),
+              SizedBox(height: 15),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -66,7 +81,8 @@ class CategoriesPage extends StatelessWidget {
                     width: 180,
                     height: 180,
                     child: ElevatedButton(
-                      onPressed: () => _openCategory(context, Category.architecture),
+                      onPressed:
+                          () => _openCategory(context, Category.architecture),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Color.fromRGBO(203, 170, 203, 1),
                         foregroundColor: Color.fromRGBO(255, 255, 255, 1),
@@ -135,7 +151,8 @@ class CategoriesPage extends StatelessWidget {
                     width: 180,
                     height: 180,
                     child: ElevatedButton(
-                      onPressed: () => _openCategory(context, Category.memorial),
+                      onPressed:
+                          () => _openCategory(context, Category.memorial),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Color.fromRGBO(188, 138, 95, 1),
                         foregroundColor: Color.fromRGBO(255, 255, 255, 1),
@@ -207,6 +224,23 @@ class CategoriesPage extends StatelessWidget {
   }
 }
 
+Future<void> getPoints() async {
+  final dbData = await getData();
+
+  for (final marker in dbData) {
+    if (marker.typePoint == TypePoint.architecture) {
+      architectureMarkers.add(marker);
+    } else if (marker.typePoint == TypePoint.nature) {
+      natureMarkers.add(marker);
+    } else if (marker.typePoint == TypePoint.monument) {
+      monumentMarkers.add(marker);
+    } else if (marker.typePoint == TypePoint.legends) {
+      historyMarkers.add(marker);
+    }
+    allMarkers.add(marker);
+  }
+}
+
 class CategoryDetailsPage extends StatelessWidget {
   final Category category;
 
@@ -214,29 +248,218 @@ class CategoryDetailsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    String title;
+    List<MarkerMap> selectedList;
+
+    String navTitle = "";
+    String title = "";
+    String subtitle = "";
+
     switch (category) {
       case Category.route:
-        title = 'Маршруты';
+        navTitle = '';
+        title = routesText[0];
+        subtitle = routesText[1];
+        selectedList = allMarkers;
         break;
       case Category.architecture:
-        title = 'Архитектура Екатеринбурга';
+        navTitle = '';
+        title = architectureText[0];
+        subtitle = architectureText[1];
+        selectedList = architectureMarkers;
         break;
       case Category.nature:
-        title = 'Природа Екатеринбурга';
+        navTitle = '';
+        title = natureText[0];
+        subtitle = natureText[1];
+        selectedList = natureMarkers;
         break;
       case Category.memorial:
-        title = 'Памятники Екатеринбурга';
+        navTitle = '';
+        title = memorialText[0];
+        subtitle = memorialText[1];
+        selectedList = monumentMarkers;
         break;
       case Category.history:
-        title = 'Истории и легенды';
+        navTitle = '';
+        title = historyText[0];
+        subtitle = historyText[1];
+        selectedList = historyMarkers;
         break;
     }
 
+    List<Widget> getText(MarkerMap marker, Function moreInfoFunc) {
+      final sentenses = marker.description.split(". ");
+      var shortDescription = sentenses.getRange(0, 2).join(". ");
+      shortDescription += '.';
+      if (marker.isChecked == 1) {
+        return [
+          Container(
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.vertical(
+                top: Radius.circular(10),
+                bottom: Radius.circular(10),
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Color.fromRGBO(0, 0, 0, 0.5),
+                  blurRadius: 13,
+                  spreadRadius: 0,
+                ),
+              ],
+            ),
+            child: Column(
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.all(Radius.circular(10)),
+                  child: Image(
+                    image: AssetImage(marker.imgLink),
+                    fit: BoxFit.fitWidth,
+                  ),
+                ),
+                Padding(
+                  padding: EdgeInsets.only(left: 16, top: 16, bottom: 16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        marker.name,
+                        textAlign: TextAlign.left,
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 15,
+                        ),
+                      ),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Flexible(
+                            flex: 10,
+                            child: Text(
+                              shortDescription,
+                              textAlign: TextAlign.start,
+                              style: TextStyle(fontSize: 12),
+                            ),
+                          ),
+                          Flexible(
+                            flex: 4,
+                            child: TextButton(
+                              onPressed: () {
+                                moreInfoFunc();
+                              },
+                              style: ButtonStyle(
+                                padding: WidgetStateProperty.all(
+                                  EdgeInsets.zero,
+                                ),
+                                minimumSize: WidgetStateProperty.all(Size.zero),
+                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                              ),
+                              child: Text(
+                                "Подробнее",
+                                textAlign: TextAlign.end,
+                                style: TextStyle(
+                                  fontStyle: FontStyle.italic,
+                                  color: Colors.black,
+                                  fontWeight: FontWeight.normal,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ];
+      } else {
+        return [
+          Container(
+            decoration: const BoxDecoration(
+              boxShadow: [
+                BoxShadow(
+                  color: Color.fromRGBO(0, 0, 0, 0.5),
+                  blurRadius: 13,
+                  spreadRadius: 0,
+                ),
+              ],
+            ),
+            child: Stack(
+              children: [
+                Image.asset("assets/images/widgets_imgs/lock.png"),
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    SizedBox(height: 100, width: 357),
+                    Text(
+                      "Откроется, когда изведаете локацию",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 14),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          Padding(
+            padding: EdgeInsets.only(left: 16, right: 16, top: 17, bottom: 0),
+          ),
+        ];
+      }
+    }
+
     return Scaffold(
-      appBar: AppBar(title: Text(title)),
-      body: Center(
-        child: Text(title),
+      appBar: AppBar(title: Text(navTitle)),
+      body: ListView(
+        padding: const EdgeInsets.only(left: 16, right: 16),
+        children: [
+          const SizedBox(height: 16),
+          Text(
+            title,
+            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            subtitle,
+            style: TextStyle(fontSize: 14, color: Colors.black87),
+          ),
+          const SizedBox(height: 16),
+          ...List.generate(
+            selectedList.length,
+            (index) => Container(
+              margin: EdgeInsets.zero,
+              decoration: BoxDecoration(
+                color: const Color.fromRGBO(25, 5, 242, 0),
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(20),
+                  bottom: Radius.circular(20),
+                ),
+              ),
+              child: Column(
+                children: [
+                  Center(
+                    child: Container(
+                      margin: EdgeInsets.zero,
+                      width: 40,
+                      height: 4,
+                    ),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.zero,
+                    child: Column(
+                      children: getText(selectedList[index], () {
+                        openMoreInfo(context, selectedList[index]);
+                      }),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
