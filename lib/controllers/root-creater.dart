@@ -2,12 +2,9 @@ import 'dart:async';
 import 'dart:math' as fl_math;
 
 import 'package:flutter/material.dart' as fl_material;
-// import 'package:yandex_maps_mapkit/image.dart' as image_provider;
 import 'package:yandex_maps_mapkit/mapkit.dart' ;
 import 'package:yandex_maps_mapkit/runtime.dart';
 import 'package:yandex_maps_mapkit/transport.dart';
-
-// final startRouteImg = image_provider.ImageProvider.fromImageProvider(const AssetImage("assets/icons/markers/start_route.png"));
 
 class PedestrianRouteManager {
   List<MasstransitRoute> pedestrianRoutes = [];

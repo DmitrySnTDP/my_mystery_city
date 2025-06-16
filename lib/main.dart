@@ -8,12 +8,13 @@ import '_mapkit_key.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  checkDB();
-  getPoints();
+  await checkDB();
+  
   init.initMapkit(
     apiKey: mapkitApiKey,
     locale: "ru_RU"
   );
+  await getPoints();
   runApp(MyApp());
 }
 

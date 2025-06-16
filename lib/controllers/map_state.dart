@@ -175,3 +175,20 @@ Future<void> showNearPlace() async {
     );
   }
 }
+
+void moveToTappedMarker() {
+  if (mapWindow_ != null) {
+    mapWindow_!.map.moveWithAnimation(
+      CameraPosition(
+        Point(latitude: tappedMarker.value!.latitude, longitude:  tappedMarker.value!.longitude),
+        zoom: 16,
+        azimuth: 0.0,
+        tilt: 30.0
+      ),
+      Animation(
+        AnimationType.Smooth,
+        duration: 0.5,
+      )
+    );
+  }
+}

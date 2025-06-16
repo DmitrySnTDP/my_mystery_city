@@ -6,6 +6,7 @@ import 'package:my_mystery_city/views/home_page.dart';
 
 
 void openMoreInfo(BuildContext context, MarkerMap point) {
+  // Navigator.pop(context);
   Navigator.push(
     context,
     MaterialPageRoute(
@@ -64,6 +65,7 @@ class _MoreInfoPointPageState extends State<MoreInfoPointPage> {
                 }
               });
               Navigator.pop(context);
+              moveToTappedMarker();
             },
             style: ButtonStyle(
               backgroundColor: WidgetStatePropertyAll(orangeColor),

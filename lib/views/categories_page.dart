@@ -287,7 +287,7 @@ class CategoryDetailsPage extends StatelessWidget {
         break;
     }
 
-    List<Widget> getText(MarkerMap marker, Function moreInfoFunc) {
+    List<Widget> getText(MarkerMap marker) {
       final sentenses = marker.description.split(". ");
       var shortDescription = sentenses.getRange(0, 2).join(". ");
       shortDescription += '.';
@@ -313,7 +313,7 @@ class CategoryDetailsPage extends StatelessWidget {
                 ClipRRect(
                   borderRadius: BorderRadius.all(Radius.circular(10)),
                   child: Image(
-                    image: AssetImage(marker.imgLink),
+                    image: AssetImage(marker.imgLink.first),
                     fit: BoxFit.fitWidth,
                   ),
                 ),
@@ -345,7 +345,8 @@ class CategoryDetailsPage extends StatelessWidget {
                             flex: 4,
                             child: TextButton(
                               onPressed: () {
-                                moreInfoFunc();
+                                Navigator.pop(context);
+                                openMoreInfo(context, marker);
                               },
                               style: ButtonStyle(
                                 padding: WidgetStateProperty.all(
@@ -375,7 +376,8 @@ class CategoryDetailsPage extends StatelessWidget {
             ),
           ),
         ];
-      } else {
+      } 
+      else {
         return [
           Container(
             decoration: const BoxDecoration(
@@ -404,63 +406,49 @@ class CategoryDetailsPage extends StatelessWidget {
               ],
             ),
           ),
-          Padding(
-            padding: EdgeInsets.only(left: 16, right: 16, top: 17, bottom: 0),
-          ),
         ];
       }
     }
 
-    return Scaffold(
-      appBar: AppBar(title: Text(navTitle)),
-      body: ListView(
-        padding: const EdgeInsets.only(left: 16, right: 16),
-        children: [
-          const SizedBox(height: 16),
-          Text(
-            title,
-            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            subtitle,
-            style: TextStyle(fontSize: 14, color: Colors.black87),
-          ),
-          const SizedBox(height: 16),
-          ...List.generate(
-            selectedList.length,
-            (index) => Container(
-              margin: EdgeInsets.zero,
-              decoration: BoxDecoration(
-                color: const Color.fromRGBO(25, 5, 242, 0),
-                borderRadius: const BorderRadius.vertical(
-                  top: Radius.circular(20),
-                  bottom: Radius.circular(20),
+    return SafeArea(
+      child: Scaffold(
+        appBar: AppBar(title: Text(navTitle)),
+        body: ListView(
+          padding: const EdgeInsets.only(left: 16, right: 16),
+          children: [
+            const SizedBox(height: 16),
+            Text(
+              title,
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              subtitle,
+              style: TextStyle(fontSize: 14, color: Colors.black87),
+            ),
+            const SizedBox(height: 16),
+            ...List.generate(
+              selectedList.length,
+              (index) => Container(
+                margin: EdgeInsets.zero,
+                decoration: BoxDecoration(
+                  color: const Color.fromRGBO(25, 5, 242, 0),
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(20),
+                    bottom: Radius.circular(20),
+                  ),
+                ),
+                child: Padding(
+                  padding: EdgeInsets.only(bottom: 17),
+                  child: Column(
+                    children: getText(selectedList[index]),
+                  ),
                 ),
               ),
-              child: Column(
-                children: [
-                  Center(
-                    child: Container(
-                      margin: EdgeInsets.zero,
-                      width: 40,
-                      height: 4,
-                    ),
-                  ),
-                  Padding(
-                    padding: EdgeInsets.zero,
-                    child: Column(
-                      children: getText(selectedList[index], () {
-                        openMoreInfo(context, selectedList[index]);
-                      }),
-                    ),
-                  ),
-                ],
-              ),
             ),
-          ),
-        ],
-      ),
+          ],
+        ),
+      )
     );
   }
 }

@@ -7,7 +7,7 @@ import 'package:my_mystery_city/controllers/map_state.dart';
 import 'package:my_mystery_city/controllers/root-creater.dart';
 import 'package:my_mystery_city/data/reader_json.dart';
 import 'package:my_mystery_city/views/home_page.dart';
-import 'package:my_mystery_city/views/more_info_point_page.dart';
+// import 'package:my_mystery_city/views/more_info_point_page.dart';
 import 'package:my_mystery_city/views/point_window_on_map.dart';
 import 'package:my_mystery_city/views/route_variables_window.dart';
 
@@ -94,7 +94,12 @@ class _MapPageState extends State<MapPage> {
                 await makePoints(mapWindow_!);
               }
               await addUserLocationPlacemark();
-              moveToUserLocation(mapWindow_);
+              if (tappedMarker.value == null) {
+                moveToUserLocation(mapWindow_);
+              }
+              else {
+                moveToTappedMarker();
+              }
             },
           ),
           Positioned(
@@ -173,9 +178,6 @@ class _MapPageState extends State<MapPage> {
                 else {
                   throw "can't create root, because user location is not defined";
                 }
-              },
-              moreInfoFunc: () {
-                openMoreInfo(context, tappedMarker.value!);
               },
             ),
           if (showRouteNum.value != null)

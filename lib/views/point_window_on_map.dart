@@ -1,20 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:my_mystery_city/data/db_worker.dart';
 import 'package:my_mystery_city/views/home_page.dart';
+import 'package:my_mystery_city/views/more_info_point_page.dart';
 
 
 class MarkerOverlay extends StatelessWidget {
   final MarkerMap marker;
   final VoidCallback onClose;
   final VoidCallback onCreateRoot;
-  final Function moreInfoFunc;
 
   const MarkerOverlay({
     super.key,
     required this.marker,
     required this.onClose,
     required this.onCreateRoot,
-    required this.moreInfoFunc,
     }
   );
 
@@ -68,7 +67,7 @@ class MarkerOverlay extends StatelessWidget {
                   Padding(
                     padding: const EdgeInsets.all(18.0),
                     child: Column(
-                      children: getText(marker, moreInfoFunc)
+                      children: getText(marker, context)
                     ),
                   ),
                 ],
@@ -81,7 +80,7 @@ class MarkerOverlay extends StatelessWidget {
   }
 
 
-  List<Widget> getText(MarkerMap marker, Function moreInfoFunc){
+  List<Widget> getText(MarkerMap marker, BuildContext context){
     final sentenses = marker.description.split(". ");
     var shortDescription = marker.description;
     if (sentenses.length > 2) {
@@ -136,7 +135,9 @@ class MarkerOverlay extends StatelessWidget {
                         Flexible(
                           flex: 4,
                           child: TextButton(
-                            onPressed: () {moreInfoFunc();},
+                            onPressed: () {
+                              openMoreInfo(context, marker);
+                            },
                             style: ButtonStyle(
                                padding: WidgetStateProperty.all(EdgeInsets.zero),
                               minimumSize: WidgetStateProperty.all(Size.zero),
