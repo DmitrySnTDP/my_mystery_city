@@ -18,6 +18,22 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  VoidCallback? _listener;
+
+  @override
+  void initState() {
+    super.initState();
+    _listener = () {
+      if (mounted) setState(() {});
+    };
+    selectedIndex.addListener(_listener!);
+  }
+
+  @override
+  void dispose() {
+    selectedIndex.removeListener(_listener!);
+    super.dispose();
+  }
   // var selectedIndex = 0;
 
   // final gradientColor = ShaderMask(
@@ -30,14 +46,6 @@ class _MyHomePageState extends State<MyHomePage> {
   //   },
   //   child: Icon(Icons.settings),
   // );
-
-  void setSelectedIndex(int newIndex) {
-    if (newIndex >= 0 && newIndex <= 2) {
-      setState(() {
-        selectedIndex.value = newIndex;
-      });
-    }
-  }
 
 
   @override
