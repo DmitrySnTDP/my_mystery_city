@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart' ;
-// import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';
 import 'dart:async';
 
 import 'package:my_mystery_city/controllers/map_state.dart';
-import 'package:my_mystery_city/controllers/root-creater.dart';
+import 'package:my_mystery_city/controllers/root_creater.dart';
+import 'package:my_mystery_city/data/db_worker.dart';
 import 'package:my_mystery_city/data/reader_json.dart';
 import 'package:my_mystery_city/views/home_page.dart';
-// import 'package:my_mystery_city/views/more_info_point_page.dart';
 import 'package:my_mystery_city/views/point_window_on_map.dart';
 import 'package:my_mystery_city/views/route_variables_window.dart';
+import 'package:my_mystery_city/views/help_widgets.dart';
 
 import 'package:yandex_maps_mapkit/mapkit.dart' hide LocationSettings, TextStyle;
 import 'package:yandex_maps_mapkit/mapkit_factory.dart';
@@ -32,6 +32,7 @@ class _MapPageState extends State<MapPage> {
   late final double windowWidth;
   late final PedestrianRouteManager routeManager;
   var defaultPoint = Point(latitude: 56.837716, longitude: 60.596828); // убрать с костылём зума на екб
+  int? lastRouteNumValue; 
 
   @override
   void initState() {
@@ -46,24 +47,25 @@ class _MapPageState extends State<MapPage> {
     };
     tappedMarker.addListener(_listener!);
     showRouteNum.addListener(_listener!);
-
-    _positionStream = Geolocator.getPositionStream(
-      locationSettings: const LocationSettings(
-        accuracy: LocationAccuracy.high,
-        distanceFilter: 0,
-      ),
-    ).listen((Position position) {
-      final userPoint = Point(
-        latitude: position.latitude,
-        longitude: position.longitude,
-      );
-
-      if (userLocationPlacemark != null) {
-        setState(() {
-          userLocationPlacemark!.geometry = userPoint;
-        });
-      }
-    });
+    try {
+      _positionStream = Geolocator.getPositionStream(
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.high,
+          distanceFilter: 0,
+        ),
+      ).listen((Position position) {
+        final userPoint = Point(
+          latitude: position.latitude,
+          longitude: position.longitude,
+        );
+        if (userLocationPlacemark != null) {
+          setState(() {
+            userLocationPlacemark!.geometry = userPoint;
+          });
+        }
+      });
+    }
+    catch (error) {errorHelpWidget(error.toString(), bottomPos: 25);}
   }
 
   @override
@@ -78,6 +80,22 @@ class _MapPageState extends State<MapPage> {
   @override
   Widget build(BuildContext context) {
   final windowWidth = MediaQuery.of(context).size.height;
+
+  if (showRouteNum.value != lastRouteNumValue) {
+    if (showRouteNum.value == null) {
+      routeManager.cancelAllSessions();
+    }
+    lastRouteNumValue = showRouteNum.value;
+  }
+
+  var extraHeightButtons = 0.0;
+  if (tappedMarker.value != null) {
+    extraHeightButtons = MediaQuery.of(context).size.height * 0.30;
+  }
+  else if (showRouteNum.value != null) {
+    extraHeightButtons = 180;
+  }
+
   return MaterialApp(
     theme: Theme.of(context),
     home: Scaffold(
@@ -102,13 +120,23 @@ class _MapPageState extends State<MapPage> {
               }
             },
           ),
+          if (firsTapGeo)
+            startHelpWidget(
+              "Нажмите чтобы увидеть своё местоположение", 
+              bottomPos: 25 + extraHeightButtons,
+            ),
           Positioned(
-            bottom: 0,
+            bottom: 25 + extraHeightButtons,
             right: 0,
             child: 
             ElevatedButton(
               onPressed: () {
                 moveToUserLocation(mapWindow_);
+                if (firsTapGeo) {
+                  setState(() {
+                    firsTapGeo = false;
+                  });
+                }
               },
               style: ElevatedButton.styleFrom(
                 shape: CircleBorder(),
@@ -116,34 +144,24 @@ class _MapPageState extends State<MapPage> {
               child: Icon(Icons.near_me),
             ),
           ),
+          if (firstTapNear)
+            startHelpWidget(
+              "Нажмите чтобы увидеть ближайшее неизведанное место", 
+              bottomPos: 75 + extraHeightButtons,
+            ),
           Positioned(
-            bottom: 50,
+            bottom: 75 + extraHeightButtons,
             right: 0,
-            child: 
-            // TextButton(
-            //   onPressed: () async {
-            //     await showNearPlace();
-            //   },
-            //   style: ButtonStyle(
-            //     backgroundColor: WidgetStatePropertyAll(Colors.white),
-            //     shape: WidgetStateProperty.all(
-            //     RoundedRectangleBorder(
-            //       side: BorderSide(color: orangeColor, width: 2),
-                  
-            //       borderRadius: BorderRadius.circular(10),
-            //       ),
-            //     ),
-            //   ),
-            //   child: Text(
-            //     "Ближайшее место",
-            //     style: TextStyle(
-            //       color: orangeColor,
-            //     ),
-            //   )
-            // ),
-            ElevatedButton(
+            child: ElevatedButton(
               onPressed: () async {
                 await showNearPlace();
+                setState(() {
+                  if (firstTapNear) {
+                    showRouteNum.value = null;
+                    routeManager.cancelAllSessions();
+                    firstTapNear = false;
+                  }
+                });
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: orangeColor,
@@ -176,7 +194,8 @@ class _MapPageState extends State<MapPage> {
                   routeManager.showRouteOnMap(showRouteNum.value!, mapWindow_!, windowWidth);
                 }
                 else {
-                  throw "can't create root, because user location is not defined";
+                  errorHelpWidget("невозможно построить маршрут, из-за отсутствия вашего местоположения", bottomPos: extraHeightButtons + 25);
+                  // throw "can't create root, because user location is not defined";
                 }
               },
             ),
@@ -195,7 +214,7 @@ class _MapPageState extends State<MapPage> {
                   }
                 );
               }
-            ),
+            ),    
           ],
         ),
       ),

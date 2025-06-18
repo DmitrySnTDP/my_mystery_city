@@ -56,12 +56,11 @@ void continueLogic() {
 }
 
 Future<Position?> _determinePosition() async {
-  bool serviceEnabled;
+  // bool serviceEnabled;
   LocationPermission permission;
 
   // Проверка, включен ли GPS
-  serviceEnabled = await Geolocator.isLocationServiceEnabled();
-  if (!serviceEnabled) {
+  if (!await checkEnableGeo()) {
     return null;
   }
 
@@ -81,6 +80,10 @@ Future<Position?> _determinePosition() async {
   // Получение текущей позиции
   return await Geolocator.getCurrentPosition();
 }
+
+
+Future<bool> checkEnableGeo() async => await Geolocator.isLocationServiceEnabled();
+
 
 Future<void> addUserLocationPlacemark() async {
   final imageProvider = image_provider.ImageProvider.fromImageProvider(const fl_material.AssetImage("assets/icons/user_location.png"));
