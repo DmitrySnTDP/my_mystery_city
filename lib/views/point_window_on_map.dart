@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:my_mystery_city/data/db_worker.dart';
-import 'package:my_mystery_city/views/home_page.dart';
+import 'package:my_mystery_city/main.dart';
 import 'package:my_mystery_city/views/more_info_point_page.dart';
 
 
@@ -40,7 +40,7 @@ class MarkerOverlay extends StatelessWidget {
             },
             child: Container(
               decoration: const BoxDecoration(
-                color: Color.fromRGBO(247, 245, 242, 1),
+                color: backgroundColorCustom,
                 borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
                 boxShadow: [
                   BoxShadow(

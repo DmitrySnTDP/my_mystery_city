@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:my_mystery_city/controllers/profile_state.dart';
+import 'package:my_mystery_city/main.dart';
 
-const backgroundColor = Color.fromRGBO(247, 245, 242, 1);
+
 const goldenColor = Color.fromRGBO(244, 162, 89, 1);
 
 class ProfilePage extends StatefulWidget {
@@ -25,7 +26,6 @@ class _ProfilePageState extends State<ProfilePage> {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
-        backgroundColor: backgroundColor,
         body: ListView(
           children: [
             Container(
@@ -81,7 +81,6 @@ class _ProfilePageState extends State<ProfilePage> {
               padding: EdgeInsets.symmetric(horizontal: 19),
               margin: EdgeInsets.symmetric(vertical: 30),
               child: Column(
-                // mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -186,7 +185,7 @@ List<Widget> getQuestsWidget(List<QuestData> quests) {
     widgets.add(
       Container(
         decoration: const BoxDecoration(
-          color: backgroundColor,
+          color: backgroundColorCustom,
           borderRadius: BorderRadius.all(Radius.circular(10)),
         ),
         width: 358,

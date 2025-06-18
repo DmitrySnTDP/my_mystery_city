@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:my_mystery_city/enums/categories_enum.dart';
 import 'package:my_mystery_city/data/db_worker.dart';
 import 'package:my_mystery_city/enums/type_point_enum.dart';
+import 'package:my_mystery_city/main.dart';
 import 'package:my_mystery_city/views/more_info_point_page.dart';
 
 List<MarkerMap> allMarkers = [];
@@ -34,7 +35,7 @@ class CategoriesPage extends StatelessWidget {
       backgroundColor: Colors.white,
       body: SafeArea(
         child: Container(
-          color: Color.fromRGBO(247, 245, 242, 1),
+          color: backgroundColorCustom,
           width: double.infinity,
           height: double.infinity,
           child: Column(
@@ -47,7 +48,7 @@ class CategoriesPage extends StatelessWidget {
                   onPressed: () => _openCategory(context, Category.route),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Color.fromRGBO(244, 162, 89, 1),
-                    foregroundColor: Color.fromRGBO(255, 255, 255, 1),
+                    foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),
@@ -86,7 +87,7 @@ class CategoriesPage extends StatelessWidget {
                           () => _openCategory(context, Category.architecture),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Color.fromRGBO(203, 170, 203, 1),
-                        foregroundColor: Color.fromRGBO(255, 255, 255, 1),
+                        foregroundColor: Colors.white,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),
                         ),
@@ -118,7 +119,7 @@ class CategoriesPage extends StatelessWidget {
                       onPressed: () => _openCategory(context, Category.nature),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Color.fromRGBO(164, 196, 154, 1),
-                        foregroundColor: Color.fromRGBO(255, 255, 255, 1),
+                        foregroundColor: Colors.white,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),
                         ),
@@ -156,7 +157,7 @@ class CategoriesPage extends StatelessWidget {
                           () => _openCategory(context, Category.memorial),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Color.fromRGBO(188, 138, 95, 1),
-                        foregroundColor: Color.fromRGBO(255, 255, 255, 1),
+                        foregroundColor: Colors.white,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),
                         ),
@@ -188,7 +189,7 @@ class CategoriesPage extends StatelessWidget {
                       onPressed: () => _openCategory(context, Category.history),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Color.fromRGBO(106, 140, 175, 1),
-                        foregroundColor: Color.fromRGBO(255, 255, 255, 1),
+                        foregroundColor: Colors.white,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),
                         ),
@@ -201,7 +202,6 @@ class CategoriesPage extends StatelessWidget {
                             width: 100,
                             height: 100,
                           ),
-                          //SizedBox(height: 8,),
                           Text(
                             "История и легенды",
                             style: TextStyle(
@@ -314,78 +314,78 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
               ),
               boxShadow: [
                 BoxShadow(
-                  color: Color.fromRGBO(0, 0, 0, 0.5),
+                  color: Color.fromRGBO(0, 0, 0, 0.3),
                   blurRadius: 13,
                   spreadRadius: 0,
                 ),
               ],
             ),
             child: Column(
-              children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.all(Radius.circular(10)),
-                  child: Image(
-                    image: AssetImage(marker.imgLink.first),
-                    fit: BoxFit.fitWidth,
-                  ),
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.all(
+                  Radius.circular(10),
                 ),
-                Padding(
-                  padding: EdgeInsets.only(left: 16, top: 16, bottom: 16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        marker.name,
-                        textAlign: TextAlign.left,
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 15,
+                child: Image(
+                  image: AssetImage(marker.imgLink[0]),
+                  fit: BoxFit.fitWidth,
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      marker.name,
+                      textAlign: TextAlign.left,
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                    Text(
+                      shortDescription,
+                      textAlign: TextAlign.start,
+                      
+                      style: TextStyle(
+                        fontSize: 12,
+                      ),
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        SizedBox(
+                          height: 20,
                         ),
-                      ),
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Flexible(
-                            flex: 10,
-                            child: Text(
-                              shortDescription,
-                              textAlign: TextAlign.start,
-                              style: TextStyle(fontSize: 12),
-                            ),
+                        TextButton(
+                          onPressed: () {
+                            openMoreInfo(context, marker);
+                          },
+                          style: ButtonStyle(
+                            padding: WidgetStateProperty.all(EdgeInsets.zero),
+                            minimumSize: WidgetStateProperty.all(Size.zero),
+                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                           ),
-                          Flexible(
-                            flex: 4,
-                            child: TextButton(
-                              onPressed: () {
-                                Navigator.pop(context);
-                                openMoreInfo(context, marker);
-                              },
-                              style: ButtonStyle(
-                                padding: WidgetStateProperty.all(
-                                  EdgeInsets.zero,
-                                ),
-                                minimumSize: WidgetStateProperty.all(Size.zero),
-                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                              ),
-                              child: Text(
-                                "Подробнее",
-                                textAlign: TextAlign.end,
-                                style: TextStyle(
-                                  fontStyle: FontStyle.italic,
-                                  color: Colors.black,
-                                  fontWeight: FontWeight.normal,
-                                  fontSize: 12,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
+                          child: Text(
+                            "Подробнее",
+                            textAlign: TextAlign.end,
+                            style: TextStyle(
+                              decoration: TextDecoration.underline,
+                              fontStyle: FontStyle.italic,
+                              color: Colors.black,
+                              fontWeight: FontWeight.normal,
+                              fontSize: 12,
+                            )
+                          )
+                        )
+                      ]
+                    )
+                  ]
+                )
+              )
+            ],
+          ),
           ),
         ];
       } 
@@ -395,7 +395,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
             decoration: const BoxDecoration(
               boxShadow: [
                 BoxShadow(
-                  color: Color.fromRGBO(0, 0, 0, 0.5),
+                  color: Color.fromRGBO(0, 0, 0, 0.3),
                   blurRadius: 13,
                   spreadRadius: 0,
                 ),
@@ -424,11 +424,8 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
 
     return SafeArea(
       child: Scaffold(
-        backgroundColor: Colors.white,
         appBar: AppBar(
           title: Text(navTitle),
-          surfaceTintColor: Colors.white,
-          backgroundColor: Colors.white,
         ),
         body: ListView(
           padding: const EdgeInsets.only(left: 16, right: 16),

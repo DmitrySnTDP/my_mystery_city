@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:my_mystery_city/controllers/map_state.dart';
-import 'package:my_mystery_city/views/home_page.dart';
-// import 'package:path/path.dart';
-// import 'package:yandex_maps_mapkit/mapkit.dart';
+import 'package:my_mystery_city/main.dart';
 import 'package:yandex_maps_mapkit/transport.dart';
 
 

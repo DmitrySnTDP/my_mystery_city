@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:my_mystery_city/views/home_page.dart';
+import 'package:my_mystery_city/main.dart';
 
 
 Widget startHelpWidget(String text, {double? leftPos, double? rightPos, double? topPos, double? bottomPos, double height = 50}) {

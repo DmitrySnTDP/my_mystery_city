@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:my_mystery_city/controllers/profile_state.dart';
+import 'package:my_mystery_city/main.dart';
 import 'package:my_mystery_city/views/map_page.dart';
 import 'package:my_mystery_city/views/profile_page.dart';
 import 'categories_page.dart';
 
-const orangeColor = Color.fromRGBO(246, 135, 99, 1);
 
 final ValueNotifier<int> selectedIndex = ValueNotifier(0);
 

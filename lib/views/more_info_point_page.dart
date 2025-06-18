@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:my_mystery_city/controllers/map_state.dart';
 import 'package:my_mystery_city/data/db_worker.dart';
 import 'package:my_mystery_city/enums/type_point_enum.dart';
+import 'package:my_mystery_city/main.dart';
 import 'package:my_mystery_city/views/home_page.dart';
 
 
 void openMoreInfo(BuildContext context, MarkerMap point) {
-  // Navigator.pop(context);
   Navigator.push(
     context,
     MaterialPageRoute(

@@ -6,7 +6,7 @@ import 'package:my_mystery_city/controllers/map_state.dart';
 import 'package:my_mystery_city/controllers/root_creater.dart';
 import 'package:my_mystery_city/data/db_worker.dart';
 import 'package:my_mystery_city/data/reader_json.dart';
-import 'package:my_mystery_city/views/home_page.dart';
+import 'package:my_mystery_city/main.dart';
 import 'package:my_mystery_city/views/point_window_on_map.dart';
 import 'package:my_mystery_city/views/route_variables_window.dart';
 import 'package:my_mystery_city/views/help_widgets.dart';
