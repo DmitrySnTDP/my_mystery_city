@@ -31,6 +31,7 @@ class CategoriesPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       body: SafeArea(
         child: Container(
           color: Color.fromRGBO(247, 245, 242, 1),
@@ -241,10 +242,17 @@ Future<void> getPoints() async {
   }
 }
 
-class CategoryDetailsPage extends StatelessWidget {
+class CategoryDetailsPage extends StatefulWidget {
   final Category category;
 
   const CategoryDetailsPage({super.key, required this.category});
+
+  @override
+  State<CategoryDetailsPage> createState() => _CategoryDetailsPageState();
+}
+
+class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
+  String searchQuery = '';
 
   @override
   Widget build(BuildContext context) {
@@ -254,7 +262,7 @@ class CategoryDetailsPage extends StatelessWidget {
     String title = "";
     String subtitle = "";
 
-    switch (category) {
+    switch (widget.category) {
       case Category.route:
         navTitle = '';
         title = routesText[0];
@@ -286,6 +294,10 @@ class CategoryDetailsPage extends StatelessWidget {
         selectedList = historyMarkers;
         break;
     }
+
+    final filteredList = selectedList.where((marker) {
+      return marker.name.toLowerCase().contains(searchQuery.toLowerCase());
+    }).toList();
 
     List<Widget> getText(MarkerMap marker) {
       final sentenses = marker.description.split(". ");
@@ -412,11 +424,37 @@ class CategoryDetailsPage extends StatelessWidget {
 
     return SafeArea(
       child: Scaffold(
-        appBar: AppBar(title: Text(navTitle)),
+        appBar: AppBar(
+          title: Text(navTitle),
+          leading: IconButton(
+            icon: Image.asset('assets/icons/back.png'),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+        ),
         body: ListView(
           padding: const EdgeInsets.only(left: 16, right: 16),
           children: [
             const SizedBox(height: 16),
+            TextField(
+                decoration: InputDecoration(
+                  hintText: "Поиск",
+                  hintStyle: TextStyle(fontSize: 13),
+                  filled: true,
+                  fillColor: Colors.white,
+                  prefixIcon: ImageIcon(const AssetImage("assets/icons/search.png")),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide.none
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                ),
+                onChanged: (value) {
+                  setState(() {
+                    searchQuery = value;
+                  });
+                },
+            ),
+            const SizedBox(height: 24),
             Text(
               title,
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
@@ -428,7 +466,7 @@ class CategoryDetailsPage extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             ...List.generate(
-              selectedList.length,
+              filteredList.length,
               (index) => Container(
                 margin: EdgeInsets.zero,
                 decoration: BoxDecoration(
@@ -441,7 +479,7 @@ class CategoryDetailsPage extends StatelessWidget {
                 child: Padding(
                   padding: EdgeInsets.only(bottom: 17),
                   child: Column(
-                    children: getText(selectedList[index]),
+                    children: getText(filteredList[index]),
                   ),
                 ),
               ),
