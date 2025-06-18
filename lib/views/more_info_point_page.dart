@@ -52,9 +52,10 @@ class _MoreInfoPointPageState extends State<MoreInfoPointPage> {
 
     return SafeArea(
       child: Scaffold(
-        appBar: AppBar(),
-        bottomNavigationBar: 
-        Padding(
+        appBar: AppBar(
+          surfaceTintColor: Colors.white,
+        ),
+        bottomNavigationBar: Padding(
           padding: EdgeInsets.symmetric(horizontal: 100, vertical: 25),
           child: TextButton(
             onPressed: () {

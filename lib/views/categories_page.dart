@@ -424,12 +424,11 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
 
     return SafeArea(
       child: Scaffold(
+        backgroundColor: Colors.white,
         appBar: AppBar(
           title: Text(navTitle),
-          leading: IconButton(
-            icon: Image.asset('assets/icons/back.png'),
-            onPressed: () => Navigator.of(context).pop(),
-          ),
+          surfaceTintColor: Colors.white,
+          backgroundColor: Colors.white,
         ),
         body: ListView(
           padding: const EdgeInsets.only(left: 16, right: 16),

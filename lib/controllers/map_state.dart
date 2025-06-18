@@ -14,6 +14,10 @@ import 'package:yandex_maps_mapkit/mapkit.dart' hide LocationSettings;
 import 'package:yandex_maps_mapkit/image.dart' as image_provider;
 
 
+var errorGeoWidgetCheck = false;
+var createRouteErrorWidgetCheck = false;
+var firsTapGeo = false;
+
 Position? userPosition;
 PlacemarkMapObject? userLocationPlacemark;
 ClusterizedPlacemarkCollection? markerCollections;
@@ -113,23 +117,22 @@ StreamSubscription<Position> positionStream = Geolocator.getPositionStream(
   }
 });
 
-void moveToUserLocation(MapWindow? mapWindow_) async
+void moveToUserLocation(MapWindow mapWindow_, {bool start = false}) async
 { 
-  if (mapWindow_ != null)
-  { 
-    if (userLocationPlacemark == null){
-      // TO DO выводить виджет о необходимости включить местоположение 
+  if (userLocationPlacemark == null){
+    if (!start) {
+      errorGeoWidgetCheck = true;
     }
-    else {
-      var targetPoint = userLocationPlacemark!.geometry;
-      mapWindow_.map.moveWithAnimation(
-        CameraPosition(targetPoint, zoom: 15, azimuth: 0.0, tilt: 30.0),
-        Animation(
-          AnimationType.Smooth,
-          duration: 0.5,
-        )
-      );
-    }
+  }
+  else {
+    var targetPoint = userLocationPlacemark!.geometry;
+    mapWindow_.map.moveWithAnimation(
+      CameraPosition(targetPoint, zoom: 15, azimuth: 0.0, tilt: 30.0),
+      Animation(
+        AnimationType.Smooth,
+        duration: 0.5,
+      )
+    );
   }
 }
 
@@ -153,18 +156,24 @@ Future<void> makePoints(MapWindow mapWindow_) async {
     markerCollections!.clusterPlacemarks(clusterRadius: 25.0, minZoom: 15);
 }
 
-Future<void> showNearPlace() async {
+Future<void> showNearPlace(MapWindow mapWindow) async {
   const double radiusSearch = 2000; //радиус поиска в метрах
-  final nearPoint = await getNearPointInRadius(
-    radiusSearch, 
-    Point(
-      latitude: userLocationPlacemark!.geometry.latitude,
-      longitude: userLocationPlacemark!.geometry.longitude,
-    )
-  );
+  MarkerMap? nearPoint;
+  if (userLocationPlacemark == null) {
+    errorGeoWidgetCheck = true;
+  }
+  else {
+    nearPoint = await getNearPointInRadius(
+      radiusSearch, 
+      Point(
+        latitude: userLocationPlacemark!.geometry.latitude,
+        longitude: userLocationPlacemark!.geometry.longitude,
+      )
+    );
+  }
   if (nearPoint != null) {
     tappedMarker.value = nearPoint;
-    mapWindow_!.map.moveWithAnimation(
+    mapWindow.map.moveWithAnimation(
       CameraPosition(
         Point(latitude: nearPoint.latitude, longitude:  nearPoint.longitude),
         zoom: 16,
@@ -194,4 +203,5 @@ void moveToTappedMarker() {
       )
     );
   }
+  
 }

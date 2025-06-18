@@ -7,7 +7,6 @@ import 'package:yandex_maps_mapkit/mapkit.dart' as mapkit;
 
 Database? database;
 var firstTapNear = false;
-var firsTapGeo = false;
 
 Future<List<MarkerMap>> getData() async {
   database = await openDatabase(join(await getDatabasesPath(), "assets/db/db_local.db"));
@@ -69,7 +68,7 @@ Future<void> checkDB() async {
 
   if (!exists) {
     createFillTable();
-    firsTapGeo = firstTapNear = true;
+    firstTapNear = true;
   }
 }
 
