@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:my_mystery_city/views/home_page.dart';
 
 
 Widget startHelpWidget(String text, {double? leftPos, double? rightPos, double? topPos, double? bottomPos, double height = 50}) {
@@ -36,7 +37,7 @@ Widget startHelpWidget(String text, {double? leftPos, double? rightPos, double? 
   );
 }
 
-Widget errorHelpWidget(String text, {double? leftPos, double? rightPos, double? topPos, double? bottomPos, double height = 50}) {
+Widget errorHelpWidget(String text, {double? leftPos, double? rightPos, double? topPos, double? bottomPos, double height = 50, VoidCallback? buttonFunc}) {
   return Positioned(
     left: leftPos,
     right: rightPos,
@@ -44,7 +45,7 @@ Widget errorHelpWidget(String text, {double? leftPos, double? rightPos, double? 
     bottom: bottomPos,
     height: height,
     child: Container(
-      margin: EdgeInsets.only(left: 60),
+      margin: EdgeInsets.only(left: 10),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.all(Radius.circular(10)), 
@@ -64,6 +65,21 @@ Widget errorHelpWidget(String text, {double? leftPos, double? rightPos, double? 
               ),
             ),
           ),
+          if (buttonFunc != null)
+            TextButton(
+              onPressed: buttonFunc,
+              style: ButtonStyle(
+                backgroundColor: WidgetStatePropertyAll(orangeColor),
+                
+              ),
+              child: Text(
+                "Понятно",
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.white,
+                ),
+              ),
+            ),
         ],
       ) 
     ) 

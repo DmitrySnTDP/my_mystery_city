@@ -26,9 +26,9 @@ class MarkerOverlay extends StatelessWidget {
       right: 0,
       child: DraggableScrollableSheet(
         expand: false,
-        initialChildSize: 0.5,
+        initialChildSize: marker.isChecked == 1? 1.0: 0.5,
         minChildSize: 0.05, 
-        maxChildSize: 1.0,
+        maxChildSize: marker.isChecked == 1? 1.0: 0.5,
         builder: (context, scrollController) {
           return NotificationListener<DraggableScrollableNotification>(
             onNotification: (notification) {
@@ -107,7 +107,7 @@ class MarkerOverlay extends StatelessWidget {
                 ),
               ),
               Padding(
-                padding: EdgeInsets.only(left: 16, top: 16, bottom: 16),
+                padding: EdgeInsets.all(16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -116,42 +116,41 @@ class MarkerOverlay extends StatelessWidget {
                       textAlign: TextAlign.left,
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
-                        fontSize: 15,
+                        fontSize: 16,
+                      ),
+                    ),
+                    Text(
+                      shortDescription,
+                      textAlign: TextAlign.start,
+                      
+                      style: TextStyle(
+                        fontSize: 12,
                       ),
                     ),
                     Row(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [ 
-                        Flexible(
-                          flex: 10,
-                          child: Text(
-                            shortDescription,
-                            textAlign: TextAlign.start,
-                            style: TextStyle(
-                              fontSize: 12,
-                            ),
-                          ),
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        SizedBox(
+                          height: 20,
                         ),
-                        Flexible(
-                          flex: 4,
-                          child: TextButton(
-                            onPressed: () {
-                              openMoreInfo(context, marker);
-                            },
-                            style: ButtonStyle(
-                               padding: WidgetStateProperty.all(EdgeInsets.zero),
-                              minimumSize: WidgetStateProperty.all(Size.zero),
-                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                            ),
-                            child: Text(
-                              "Подробнее",
-                              textAlign: TextAlign.end,
-                              style: TextStyle(
-                                fontStyle: FontStyle.italic,
-                                color: Colors.black,
-                                fontWeight: FontWeight.normal,
-                                fontSize: 12,
-                              )
+                        TextButton(
+                          onPressed: () {
+                            openMoreInfo(context, marker);
+                          },
+                          style: ButtonStyle(
+                            padding: WidgetStateProperty.all(EdgeInsets.zero),
+                            minimumSize: WidgetStateProperty.all(Size.zero),
+                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          ),
+                          child: Text(
+                            "Подробнее",
+                            textAlign: TextAlign.end,
+                            style: TextStyle(
+                              decoration: TextDecoration.underline,
+                              fontStyle: FontStyle.italic,
+                              color: Colors.black,
+                              fontWeight: FontWeight.normal,
+                              fontSize: 12,
                             )
                           )
                         )

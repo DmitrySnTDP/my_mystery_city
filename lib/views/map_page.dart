@@ -16,7 +16,7 @@ import 'package:yandex_maps_mapkit/mapkit_factory.dart';
 import 'package:yandex_maps_mapkit/yandex_map.dart';
 
 
-late StreamSubscription<Position> _positionStream;
+StreamSubscription<Position>? _positionStream;
 
 MapWindow? mapWindow_;
 
@@ -47,30 +47,38 @@ class _MapPageState extends State<MapPage> {
     };
     tappedMarker.addListener(_listener!);
     showRouteNum.addListener(_listener!);
-    try {
-      _positionStream = Geolocator.getPositionStream(
-        locationSettings: const LocationSettings(
-          accuracy: LocationAccuracy.high,
-          distanceFilter: 0,
-        ),
-      ).listen((Position position) {
-        final userPoint = Point(
-          latitude: position.latitude,
-          longitude: position.longitude,
-        );
-        if (userLocationPlacemark != null) {
-          setState(() {
-            userLocationPlacemark!.geometry = userPoint;
-          });
+
+    checkEnableGeo().then(
+      (checkResult) {
+        if (checkResult) {
+          _positionStream = Geolocator.getPositionStream(
+            locationSettings: const LocationSettings(
+              accuracy: LocationAccuracy.high,
+              distanceFilter: 0,
+            ),
+          ).listen(
+            (Position position) {
+              final userPoint = Point(
+                latitude: position.latitude,
+                longitude: position.longitude,
+              );
+              if (userLocationPlacemark != null) {
+                setState(
+                  () {
+                    userLocationPlacemark!.geometry = userPoint;
+                  }
+                );
+              }
+            }
+          );
         }
-      });
-    }
-    catch (error) {errorHelpWidget(error.toString(), bottomPos: 25);}
+      }
+    );
   }
 
   @override
   void dispose() {
-    _positionStream.cancel();
+    _positionStream?.cancel();
     tappedMarker.removeListener(_listener!);
     showRouteNum.removeListener(_listener!);
     routeManager.cancelAllSessions();
@@ -90,7 +98,12 @@ class _MapPageState extends State<MapPage> {
 
   var extraHeightButtons = 0.0;
   if (tappedMarker.value != null) {
-    extraHeightButtons = MediaQuery.of(context).size.height * 0.30;
+    if (tappedMarker.value!.isChecked == 1) {
+      extraHeightButtons = MediaQuery.of(context).size.height - 325;
+    }
+    else {
+      extraHeightButtons = MediaQuery.of(context).size.height * 0.3;
+    }
   }
   else if (showRouteNum.value != null) {
     extraHeightButtons = 180;
@@ -113,7 +126,7 @@ class _MapPageState extends State<MapPage> {
               }
               await addUserLocationPlacemark();
               if (tappedMarker.value == null) {
-                moveToUserLocation(mapWindow_);
+                moveToUserLocation(mapWindow_!, start: true);
               }
               else {
                 moveToTappedMarker();
@@ -125,18 +138,49 @@ class _MapPageState extends State<MapPage> {
               "Нажмите чтобы увидеть своё местоположение", 
               bottomPos: 25 + extraHeightButtons,
             ),
+          if (firstTapNear)
+          startHelpWidget(
+            "Нажмите чтобы увидеть ближайшее неизведанное место", 
+            bottomPos: 75 + extraHeightButtons,
+          ),
+          if (errorGeoWidgetCheck)
+            errorHelpWidget(
+              "Функция недоступна из-за отстутствия информации о вашем местоположении.",
+              height: 100,
+              bottomPos: 25 + extraHeightButtons,
+              buttonFunc: () {
+                setState(
+                  () {
+                    errorGeoWidgetCheck = false;
+                  }
+                );
+              }
+            ),
+          if (createRouteErrorWidgetCheck)
+            errorHelpWidget(
+              "Невозможно построить маршрут, из-за отсутствия информации о вашем местоположении.",
+              height: 100,
+              bottomPos: 25 + extraHeightButtons,
+              buttonFunc: () {
+                setState(
+                  () {
+                    createRouteErrorWidgetCheck = false;
+                  }
+                );
+              }
+            ),
           Positioned(
             bottom: 25 + extraHeightButtons,
             right: 0,
             child: 
             ElevatedButton(
               onPressed: () {
-                moveToUserLocation(mapWindow_);
-                if (firsTapGeo) {
-                  setState(() {
-                    firsTapGeo = false;
-                  });
-                }
+                setState(() {
+                  moveToUserLocation(mapWindow_!);
+                  if (firsTapGeo) {
+                      firsTapGeo = false;
+                  }
+                });
               },
               style: ElevatedButton.styleFrom(
                 shape: CircleBorder(),
@@ -144,23 +188,17 @@ class _MapPageState extends State<MapPage> {
               child: Icon(Icons.near_me),
             ),
           ),
-          if (firstTapNear)
-            startHelpWidget(
-              "Нажмите чтобы увидеть ближайшее неизведанное место", 
-              bottomPos: 75 + extraHeightButtons,
-            ),
           Positioned(
             bottom: 75 + extraHeightButtons,
             right: 0,
             child: ElevatedButton(
-              onPressed: () async {
-                await showNearPlace();
+              onPressed: () {
                 setState(() {
                   if (firstTapNear) {
-                    showRouteNum.value = null;
-                    routeManager.cancelAllSessions();
-                    firstTapNear = false;
+                      firstTapNear = false;
+                      firsTapGeo = true;
                   }
+                  showNearPlace(mapWindow_!).then((_) {});
                 });
               },
               style: ElevatedButton.styleFrom(
@@ -194,8 +232,9 @@ class _MapPageState extends State<MapPage> {
                   routeManager.showRouteOnMap(showRouteNum.value!, mapWindow_!, windowWidth);
                 }
                 else {
-                  errorHelpWidget("невозможно построить маршрут, из-за отсутствия вашего местоположения", bottomPos: extraHeightButtons + 25);
-                  // throw "can't create root, because user location is not defined";
+                  setState(() {
+                    createRouteErrorWidgetCheck = true;
+                  });
                 }
               },
             ),

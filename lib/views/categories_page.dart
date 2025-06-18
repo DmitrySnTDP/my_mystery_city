@@ -31,6 +31,7 @@ class CategoriesPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       body: SafeArea(
         child: Container(
           color: Color.fromRGBO(247, 245, 242, 1),
@@ -412,7 +413,12 @@ class CategoryDetailsPage extends StatelessWidget {
 
     return SafeArea(
       child: Scaffold(
-        appBar: AppBar(title: Text(navTitle)),
+        backgroundColor: Colors.white,
+        appBar: AppBar(
+          title: Text(navTitle),
+          surfaceTintColor: Colors.white,
+          backgroundColor: Colors.white,
+        ),
         body: ListView(
           padding: const EdgeInsets.only(left: 16, right: 16),
           children: [
