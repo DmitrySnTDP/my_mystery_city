@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:my_mystery_city/controllers/map_state.dart';
-import 'package:my_mystery_city/views/home_page.dart';
-// import 'package:path/path.dart';
-// import 'package:yandex_maps_mapkit/mapkit.dart';
+import 'package:my_mystery_city/main.dart';
 import 'package:yandex_maps_mapkit/transport.dart';
 
 
@@ -36,38 +34,46 @@ class RouteOverlay extends StatelessWidget {
       ),
       child: ListView(
         padding: const EdgeInsets.all(10.0),
-        children:[ 
-          IconButton(
-            icon: Icon(Icons.close),
-            style: ButtonStyle(alignment: Alignment.topRight),
-            onPressed: onClose
+        children: [
+         Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          mainAxisSize: MainAxisSize.min,
+          children:[ 
+              IconButton(
+                icon: Icon(Icons.close),
+                style: ButtonStyle(alignment: Alignment.topRight),
+                onPressed: onClose
+              ),
+            ],
           ),
           Wrap(
             alignment: WrapAlignment.spaceAround,
             children: getVariablesRoute(routesData, func, context),
           ),
-          Padding(padding: EdgeInsets.only(left: 120, right: 120), child: 
-          TextButton(
-            onPressed: null,
-            style: ButtonStyle(
-              backgroundColor: WidgetStatePropertyAll(orangeColor),
-              shape: WidgetStateProperty.all(
-                RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
+          Padding(
+            padding: EdgeInsets.only(left: 120, right: 120),
+            child: TextButton(
+              onPressed: null,
+              style: ButtonStyle(
+                backgroundColor: WidgetStatePropertyAll(orangeColor),
+                shape: WidgetStateProperty.all(
+                  RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
                 ),
+                minimumSize: WidgetStatePropertyAll(Size(150, 50)),
               ),
-              minimumSize: WidgetStatePropertyAll(Size(150, 50)),
+              child: Text(
+                "Начать",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 14,
+                )
+              ),
             ),
-            child: Text(
-              "Начать",
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 14,
-              )
-            ),
-          ),)
+          )
         ]
-      ),
+      )
     );
   }
 }

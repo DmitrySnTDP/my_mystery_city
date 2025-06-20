@@ -1,4 +1,5 @@
 import 'package:my_mystery_city/data/reader_json.dart';
+import 'package:my_mystery_city/enums/routes_enum.dart';
 import 'package:my_mystery_city/enums/type_point_enum.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
@@ -6,11 +7,11 @@ import 'package:yandex_maps_mapkit/mapkit.dart' as mapkit;
 
 
 Database? database;
+var firstTapNear = false;
 
 Future<List<MarkerMap>> getData() async {
-  database = await openDatabase(join(await getDatabasesPath(), "assets/db/db_local.db"));
-  var data = getMarkersMap();
-  return data;
+  await checkOpenDB();
+  return await getMarkersMap();
 }
 
 class MarkerMap {
@@ -21,7 +22,7 @@ class MarkerMap {
   final String name;
   final String description;
   final String routeName;
-  final String imgLink;
+  final List<String> imgLink;
 
   MarkerMap({
     required this.latitude,
@@ -43,7 +44,7 @@ class MarkerMap {
       'name': name,
       'description': description,
       'route_name': routeName,
-      'img_link': imgLink
+      'img_link': imgLink.join(" ")
     };
   }
 
@@ -51,12 +52,12 @@ class MarkerMap {
     return MarkerMap(
       latitude: json["latitude"],
       longitude: json["longitude"],
-      typePoint: getTypePoint(json["type_point"]),
+      typePoint: getTypePointFromDB(json["type_point"]),
       isChecked: json["is_checked"],
       name: json["name"],
       description: json["description"], 
       routeName: json["route_name"],
-      imgLink: json["img_link"],
+      imgLink: json["img_link"].split(" "),
     );
   }
 }
@@ -66,23 +67,28 @@ Future<void> checkDB() async {
   var exists = await databaseExists(path);
 
   if (!exists) {
-    createFillTable();
+    await createFillTable();
+    firstTapNear = true;
   }
 }
 
+Future<void> checkOpenDB() async {
+  database ??= await openDatabase(join(await getDatabasesPath(), "assets/db/db_local.db"));
+}
+
 Future<void> createFillTable() async {
-  createTable();
-  database = await openDatabase(join(await getDatabasesPath(), "assets/db/db_local.db"));
+  await createTable();
+  await checkOpenDB();
   var markers = await readMarkersFromJson("assets/db/points.json");
   for (var marker in markers)
   {
-    insertMarker(marker);
+    await insertMarker(marker);
   }
 }
 
 Future<void>createTable() async {
   // ignore: unused_local_variable
-  var database_ = openDatabase(join(await getDatabasesPath(), "assets/db/db_local.db"),
+  var database_ = await openDatabase(join(await getDatabasesPath(), "assets/db/db_local.db"),
     onCreate: (db, version) {
       return db.execute(
         'CREATE TABLE markers_data (latitude REAL NOT NULL, longitude	REAL NOT NULL, type_point	INTEGER NOT NULL DEFAULT 1 CHECK(type_point >= 1 AND type_point <= 5), is_checked	BLOB NOT NULL, name	TEXT,	description	TEXT, route_name TEXT, img_link TEXT,	PRIMARY KEY(latitude, longitude))',
@@ -93,6 +99,7 @@ Future<void>createTable() async {
 }
 
 Future<List<MarkerMap>> getMarkersMap() async {
+  await checkOpenDB();
   final db = database!;
 
   final List<Map<String, Object?>> markersMaps = await db.query('markers_data');
@@ -111,17 +118,18 @@ Future<List<MarkerMap>> getMarkersMap() async {
       MarkerMap(
         latitude: latitude,
         longitude: longitude,
-        typePoint: getTypePoint(typePoint),
+        typePoint: getTypePointFromDB(typePoint),
         isChecked: isChecked,
         name: name,
         description: description,
         routeName: routeName, 
-        imgLink: imgLink
+        imgLink: imgLink.split(" ")
       ),
   ];
 }
 
 Future<void> insertMarker(MarkerMap marker) async {
+  await checkOpenDB();
   final db = database!;
   await db.insert(
     'markers_data',
@@ -131,8 +139,8 @@ Future<void> insertMarker(MarkerMap marker) async {
 }
 
 Future<void> deleteMarkerMap(String name) async {
+  await checkOpenDB();
   final db = database!;
-
   await db.delete(
     'markers_data',
     where: 'name = ?',
@@ -141,8 +149,8 @@ Future<void> deleteMarkerMap(String name) async {
 }
 
 Future<void> updateMarkerMapExploreStatus(MarkerMap marker) async {
+  await checkOpenDB();
   final db = database!;
-
   await db.update(
     'markers_data',
     {'is_checked': marker.isChecked},
@@ -152,6 +160,7 @@ Future<void> updateMarkerMapExploreStatus(MarkerMap marker) async {
 }
 
 Future<List<MarkerMap>> getMarkerMapInRadius(mapkit.Point userPoint, double dLatitude, double dLongitude) async {
+  await checkOpenDB();
   final db = database!;
   List<MarkerMap> markers = [];
   final markersData = await db.query(
@@ -166,6 +175,7 @@ Future<List<MarkerMap>> getMarkerMapInRadius(mapkit.Point userPoint, double dLat
 }
 
 Future<MarkerMap?> getMarkerMap(double latitude, double longitude) async {
+  await checkOpenDB();
   final db = database!;
   final result = await db.query(
     'markers_data',
@@ -180,7 +190,38 @@ Future<MarkerMap?> getMarkerMap(double latitude, double longitude) async {
   return null;
 }
 
-TypePoint getTypePoint(int data) {
+Future<List<MarkerMap>> getMarkersMapOnRoute(RouteType routeType) async {
+  await checkOpenDB();
+  final db = database!;
+  List<MarkerMap> markers = [];
+  final markersData = await db.query(
+    'markers_data',
+    where: 'route_name LIKE ?',
+    whereArgs: ["%${routeType.identificator}%"],
+  );
+  for (var data in markersData) {
+    markers.add(MarkerMap.fromJson(data));
+  }
+  return markers;
+}
+
+Future<List<MarkerMap>> getMarkersMapOnType(TypePoint type) async {
+  await checkOpenDB();
+  final db = database!;
+  List<MarkerMap> markers = [];
+  final markersData = await db.query(
+    'markers_data',
+    where: 'type_point = ?',
+    whereArgs: [type.indexType],
+  );
+  for (var data in markersData) {
+    markers.add(MarkerMap.fromJson(data));
+  }
+  return markers;
+}
+
+
+TypePoint getTypePointFromDB(int data) {
   switch (data){
     case(1):
       return TypePoint.intrestingPlace;
@@ -195,4 +236,15 @@ TypePoint getTypePoint(int data) {
     default:
       return TypePoint.intrestingPlace;
   }
+}
+
+List<RouteType> getRouteNameFromDB(String data) {
+  final dataList = data.split(", ");
+  final List<RouteType> result = RouteType.values.where(
+    (routeType) {
+      return dataList.contains(routeType.identificator);
+    }
+  ).toList();
+
+    return result;
 }

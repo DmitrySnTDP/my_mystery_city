@@ -1,19 +1,40 @@
 import 'package:flutter/material.dart';
+import 'package:my_mystery_city/controllers/profile_state.dart';
+import 'package:my_mystery_city/main.dart';
 import 'package:my_mystery_city/views/map_page.dart';
+import 'package:my_mystery_city/views/profile_page.dart';
 import 'categories_page.dart';
 
-const orangeColor = Color.fromRGBO(246, 135, 99, 1);
+
+final ValueNotifier<int> selectedIndex = ValueNotifier(1);
+
 
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key,s});
+  const MyHomePage({super.key,});
   
   @override
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  var selectedIndex = 0;
+  VoidCallback? _listener;
+
+  @override
+  void initState() {
+    super.initState();
+    _listener = () {
+      if (mounted) setState(() {});
+    };
+    selectedIndex.addListener(_listener!);
+  }
+
+  @override
+  void dispose() {
+    selectedIndex.removeListener(_listener!);
+    super.dispose();
+  }
+  // var selectedIndex = 0;
 
   // final gradientColor = ShaderMask(
   // shaderCallback: (Rect bounds) {
@@ -26,20 +47,12 @@ class _MyHomePageState extends State<MyHomePage> {
   //   child: Icon(Icons.settings),
   // );
 
-  void setSelectedIndex(int newIndex) {
-    if (newIndex >= 0 && newIndex <= 2) {
-      setState(() {
-        selectedIndex = newIndex;
-      });
-    }
-  }
-
 
   @override
   Widget build(BuildContext context){
 
     Widget page = Placeholder();
-    switch (selectedIndex) {
+    switch (selectedIndex.value) {
       case 0:
         page = CategoriesPage();
         break;
@@ -47,7 +60,7 @@ class _MyHomePageState extends State<MyHomePage> {
         page = MapPage();
         break;
       case 2:
-        page = Placeholder(color: Colors.green,);
+        page = ProfilePage(badges: badgesList, quests: questsList,);
         break;
     }
 
@@ -64,7 +77,7 @@ class _MyHomePageState extends State<MyHomePage> {
             NavigationBar(
               onDestinationSelected: (int index) {
                 setState(() {
-                  selectedIndex = index;
+                  selectedIndex.value = index;
                   });
                 },
               
@@ -80,7 +93,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       : Color.fromRGBO(51, 51, 51, 1),
                 );
               }),
-              selectedIndex: selectedIndex,
+              selectedIndex: selectedIndex.value,
               destinations: <Widget>[
                 NavigationDestination(
                   selectedIcon: ImageIcon(const AssetImage("assets/icons/routes.png"), color: orangeColor),

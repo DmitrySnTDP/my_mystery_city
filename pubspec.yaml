@@ -67,6 +67,8 @@ flutter:
   assets:
       - assets/icons/
       - assets/icons/markers/
+      - assets/icons/badges/
+      - assets/icons/quests/
       - assets/images/
       - assets/images/place_images/
       - assets/images/widgets_imgs/
