@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:my_mystery_city/controllers/map_state.dart';
 import 'package:my_mystery_city/views/categories_page.dart';
+import 'package:my_mystery_city/views/routes_page.dart';
 import 'package:yandex_maps_mapkit/init.dart' as init;
 import 'views/home_page.dart';
 import 'data/db_worker.dart';
@@ -11,11 +13,14 @@ const backgroundColorCustom =  Color.fromRGBO(247, 245, 242, 1);
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await checkDB();
-  await getPoints();
   init.initMapkit(
     apiKey: mapkitApiKey,
     locale: "ru_RU"
   );
+  determinePosition();
+  await getPoints();
+  await getMarkerForMap();
+  await getRoutes();
   runApp(MyApp());
 }
 

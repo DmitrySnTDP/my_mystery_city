@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:my_mystery_city/controllers/map_state.dart';
 import 'package:my_mystery_city/data/db_worker.dart';
-import 'package:my_mystery_city/enums/type_point_enum.dart';
 import 'package:my_mystery_city/main.dart';
 import 'package:my_mystery_city/views/home_page.dart';
 
@@ -29,26 +28,8 @@ class _MoreInfoPointPageState extends State<MoreInfoPointPage> {
 
   @override
   Widget build(BuildContext context) {
-    var category = 'без категории';
-    switch (widget.point.typePoint) {
-      case TypePoint.intrestingPlace:
-        category = 'без категории';
-        break;
-      case TypePoint.architecture:
-        category = 'архитектура ';
-        break;
-      case TypePoint.nature:
-        category = 'природа';
-        break;
-      case TypePoint.monument:
-        category = 'памятники';
-        break;
-      case TypePoint.legends:
-        category = 'истории и легенды';
-        break;
-    }
-
-    img = AssetImage(widget.point.imgLink[indexImg]);
+    final category = widget.point.typePoint.title.toLowerCase();
+    var img = AssetImage(widget.point.imgLink[indexImg]);
 
     return SafeArea(
       child: Scaffold(
@@ -66,6 +47,7 @@ class _MoreInfoPointPageState extends State<MoreInfoPointPage> {
                 }
               });
               Navigator.pop(context);
+              Navigator.canPop(context);
               moveToTappedMarker();
             },
             style: ButtonStyle(

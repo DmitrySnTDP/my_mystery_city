@@ -47,29 +47,36 @@ class _MapPageState extends State<MapPage> {
     };
     tappedMarker.addListener(_listener!);
     showRouteNum.addListener(_listener!);
+    showOtherRoutePage.addListener(_listener!);
 
     checkEnableGeo().then(
       (checkResult) {
         if (checkResult) {
-          _positionStream = Geolocator.getPositionStream(
-            locationSettings: const LocationSettings(
-              accuracy: LocationAccuracy.high,
-              distanceFilter: 0,
-            ),
-          ).listen(
-            (Position position) {
-              final userPoint = Point(
-                latitude: position.latitude,
-                longitude: position.longitude,
-              );
-              if (userLocationPlacemark != null) {
-                setState(
-                  () {
-                    userLocationPlacemark!.geometry = userPoint;
+          checkPermissionGeo().then(
+            (result) {
+              if (result) {
+                _positionStream = Geolocator.getPositionStream(
+                  locationSettings: const LocationSettings(
+                    accuracy: LocationAccuracy.high,
+                    distanceFilter: 0,
+                  ),
+                ).listen(
+                  (Position position) {
+                    final userPoint = Point(
+                      latitude: position.latitude,
+                      longitude: position.longitude,
+                    );
+                    if (userLocationPlacemark != null) {
+                      setState(
+                        () {
+                          userLocationPlacemark!.geometry = userPoint;
+                        }
+                      );
+                    }
                   }
                 );
               }
-            }
+            } 
           );
         }
       }
@@ -81,6 +88,7 @@ class _MapPageState extends State<MapPage> {
     _positionStream?.cancel();
     tappedMarker.removeListener(_listener!);
     showRouteNum.removeListener(_listener!);
+    showOtherRoutePage.removeListener(_listener!);
     routeManager.cancelAllSessions();
     super.dispose();
   }
@@ -122,7 +130,7 @@ class _MapPageState extends State<MapPage> {
               mapWindow_!.map.move(CameraPosition(defaultPoint, zoom: 12.5, azimuth: 0.0, tilt: 30.0));
               mapkit.onStart();
               if (userPosition == null){
-                await makePoints(mapWindow_!);
+                await makePoints(mapWindow_!, markersMap);
               }
               await addUserLocationPlacemark();
               if (tappedMarker.value == null) {
@@ -223,10 +231,17 @@ class _MapPageState extends State<MapPage> {
               onCreateRoot: () async {
                 if (userLocationPlacemark != null){
                   await routeManager.buildRoute(
-                    startPoint: Point(latitude: userLocationPlacemark!.geometry.latitude, longitude: userLocationPlacemark!.geometry.longitude),
-                    endPoint: Point(latitude: tappedMarker.value!.latitude, longitude: tappedMarker.value!.longitude)
+                    requestPoints: [
+                      RequestPoint(
+                        Point(latitude: userLocationPlacemark!.geometry.latitude, longitude: userLocationPlacemark!.geometry.longitude),
+                        RequestPointType.Waypoint, null, null, null
+                      ),
+                      RequestPoint(
+                        Point(latitude: tappedMarker.value!.latitude, longitude: tappedMarker.value!.longitude),
+                        RequestPointType.Waypoint, null, null, null
+                      )
+                    ]
                   );
-
                   tappedMarker.value = null;
                   showRouteNum.value = 0;
                   routeManager.showRouteOnMap(showRouteNum.value!, mapWindow_!, windowWidth);
@@ -253,7 +268,25 @@ class _MapPageState extends State<MapPage> {
                   }
                 );
               }
-            ),    
+            ),
+          if (showOtherRoutePage.value != null)
+            errorHelpWidget(
+              "Двигайтесь по линии маршрута, при приближении к точке, нажимите на метку, чтобы исследовать её.",
+              buttonText: "Закончить",
+              topPos: 10,
+              height: 100,
+              leftPos: 5,
+              width: 250,
+              buttonFunc: () async {
+                setState(()  {
+                  showOtherRoutePage.value!.cancelAllSessions();  
+                  showOtherRoutePage.value = null;
+                });
+                removePoints();
+                await getMarkerForMap();
+                await makePoints(mapWindow_!, markersMap);
+              }
+            ),      
           ],
         ),
       ),

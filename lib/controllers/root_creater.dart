@@ -18,15 +18,11 @@ class PedestrianRouteManager {
   
 
   Future<void> buildRoute({
-    required Point startPoint,
-    required Point endPoint,
+    required List<RequestPoint> requestPoints,
   }) async {
-    final requestPoints = [
-      RequestPoint(startPoint, RequestPointType.Waypoint, null, null, null),
-      RequestPoint(endPoint, RequestPointType.Waypoint, null, null, null),
-    ];
-    startRoutePoint = startPoint;
-    endRoutePoint = endPoint;
+
+    startRoutePoint = requestPoints.first.point;
+    endRoutePoint = requestPoints.last.point;
 
     final completer = Completer<void>();
 
@@ -99,7 +95,7 @@ class PedestrianRouteManager {
   }
 
   void _requestPedestrianRoutes(List<RequestPoint> points, RouteHandler pedestrianRouteListener) {
-    var timeOptions = TimeOptions(departureTime: DateTime.now());
+    var timeOptions = TimeOptions();
     const routeOptions = RouteOptions(FitnessOptions(avoidSteep: false));
 
     pedestrianSession = pedestrianRouter.requestRoutes(

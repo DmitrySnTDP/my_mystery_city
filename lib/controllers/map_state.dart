@@ -1,9 +1,12 @@
 import 'dart:async';
 import 'dart:core';
 
-import 'package:flutter/material.dart' as fl_material;
+import 'package:flutter/material.dart' as fl_material ;
+import 'package:flutter/widgets.dart' hide Animation;
 import 'package:geolocator/geolocator.dart';
+import 'package:my_mystery_city/controllers/root_creater.dart';
 import 'package:my_mystery_city/controllers/search_nearest_place.dart';
+import 'package:my_mystery_city/views/home_page.dart';
 
 import 'package:my_mystery_city/views/map_page.dart';
 import 'package:my_mystery_city/data/db_worker.dart';
@@ -17,13 +20,20 @@ import 'package:yandex_maps_mapkit/image.dart' as image_provider;
 var errorGeoWidgetCheck = false;
 var createRouteErrorWidgetCheck = false;
 var firsTapGeo = false;
+late List<MarkerMap> markersMap;
+
+Future<List<MarkerMap>> getMarkerForMap() async {
+  return markersMap = await getData();
+}
 
 Position? userPosition;
 PlacemarkMapObject? userLocationPlacemark;
 ClusterizedPlacemarkCollection? markerCollections;
+final fl_material.ValueNotifier<Position?> userLocation = fl_material.ValueNotifier(null);
 final fl_material.ValueNotifier<MarkerMap?> tappedMarker = fl_material.ValueNotifier(null);
 final fl_material.ValueNotifier<int?> showRouteNum = fl_material.ValueNotifier(null);
 final fl_material.ValueNotifier<bool> showMoreInfoCheck = fl_material.ValueNotifier(false);
+final fl_material.ValueNotifier<PedestrianRouteManager?> showOtherRoutePage = fl_material.ValueNotifier(null);
 
 final MapObjectTapListenerImpl tabMarkerListener = MapObjectTapListenerImpl(onMapObjectTapped:
   (mapObject , point ) {
@@ -50,41 +60,51 @@ void continueLogic() {
   if (tappedMarker.value != null && tappedMarker.value!.isChecked == 0) {
     if (userLocationPlacemark != null && (userLocationPlacemark!.geometry.latitude - tappedMarker.value!.latitude).abs() < 0.001
       && (userLocationPlacemark!.geometry.longitude - tappedMarker.value!.longitude).abs() < 0.001) {
-      removeUnknownPoint(tappedMarker.value!);
+      removePoints();
       tappedMarker.value!.isChecked = 1;
       updateMarkerMapExploreStatus(tappedMarker.value!);
-      makePoints(mapWindow_!);
+      getMarkerForMap().then(
+        (_) async {
+          await makePoints(mapWindow_!, markersMap);
+        }
+      );
+      
     }
   }
   
 }
 
-Future<Position?> _determinePosition() async {
-  // bool serviceEnabled;
-  LocationPermission permission;
-
+Future<Position?> determinePosition() async {
   // Проверка, включен ли GPS
   if (!await checkEnableGeo()) {
-    return null;
+    return userLocation.value = null;
+    // return;
   }
-
   // Проверка разрешений
-  permission = await Geolocator.checkPermission();
-  if (permission == LocationPermission.denied) {
-    permission = await Geolocator.requestPermission();
-    if (permission == LocationPermission.denied) {
-      return null;
-    }
+  if (!await checkPermissionGeo()){
+    return userLocation.value = null;
+    // return;
   }
-  
-  if (permission == LocationPermission.deniedForever) {
-    return null;
-  } 
-
   // Получение текущей позиции
-  return await Geolocator.getCurrentPosition();
+  return userLocation.value = await Geolocator.getCurrentPosition();
 }
 
+Future<bool> checkPermissionGeo() async {
+  LocationPermission permission;
+
+  permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        return false;
+      }
+    }
+    
+    if (permission == LocationPermission.deniedForever) {
+      return false;
+    } 
+    return true;
+}
 
 Future<bool> checkEnableGeo() async => await Geolocator.isLocationServiceEnabled();
 
@@ -92,7 +112,7 @@ Future<bool> checkEnableGeo() async => await Geolocator.isLocationServiceEnabled
 Future<void> addUserLocationPlacemark() async {
   final imageProvider = image_provider.ImageProvider.fromImageProvider(const fl_material.AssetImage("assets/icons/user_location.png"));
   
-  var userPosition = await _determinePosition(); 
+  var userPosition = await determinePosition(); 
   if (userPosition != null) {
     userLocationPlacemark = mapWindow_!.map.mapObjects.addPlacemark();
     userLocationPlacemark!.geometry = Point(latitude: userPosition.latitude, longitude: userPosition.longitude);
@@ -136,8 +156,8 @@ void moveToUserLocation(MapWindow mapWindow_, {bool start = false}) async
   }
 }
 
-void removeUnknownPoint(MarkerMap marker) {
-  markerCollections!.clear();
+void removePoints() {
+    markerCollections?.clear();
 }
 
 void addPoint(MarkerMap marker) {
@@ -145,15 +165,15 @@ void addPoint(MarkerMap marker) {
   markerCollections!.addPlacemarkWithImage(Point(latitude: marker.latitude, longitude: marker.longitude), img);
 }
 
-Future<void> makePoints(MapWindow mapWindow_) async {
+Future<void> makePoints(MapWindow mapWindow_, List<MarkerMap> markers) async {
     markerCollections =  mapWindow_.map.mapObjects.addClusterizedPlacemarkCollection(clusterListener);
-    final dbData = await getData();
+    // final dbData = await getData();
 
-    for (final marker in dbData) {
+    for (final marker in markers) {
       addPoint(marker);
     }
     markerCollections!.addTapListener(tabMarkerListener);
-    markerCollections!.clusterPlacemarks(clusterRadius: 25.0, minZoom: 15);
+    markerCollections!.clusterPlacemarks(clusterRadius: 40, minZoom: 15);
 }
 
 Future<void> showNearPlace(MapWindow mapWindow) async {
@@ -203,5 +223,78 @@ void moveToTappedMarker() {
       )
     );
   }
+}
+
+
+Future<PedestrianRouteManager> createRouteFromMarkers(List<MarkerMap> markers) async {
+  final routeManager = PedestrianRouteManager();  
+  List<RequestPoint> requestPoints = [
+    RequestPoint(
+      Point(latitude: markers[1].latitude, longitude: markers[1].longitude), 
+      RequestPointType.Waypoint, 
+      null, null, null,
+    ),
+    RequestPoint(
+      Point(latitude: markers[markers.length - 2].latitude, longitude: markers[markers.length - 2].longitude), 
+      RequestPointType.Waypoint, 
+      null, null, null,
+    ),
+  ];
+  // await addUserLocationPlacemark();
+  // await determinePosition();
+  // if (userLocation.value != null) {
+  //   requestPoints.add(
+  //     RequestPoint(
+  //       Point(latitude: userLocation.value!.latitude, longitude: userLocation.value!.longitude), 
+  //       RequestPointType.Waypoint, 
+  //       null, null, null,
+  //     )
+  //   );
+  // }
+
+  // for (final marker in markers) {
+  //   var typePoint = RequestPointType.Waypoint;
+  //   // if (marker == markers.first) {
+  //   //   typePoint = RequestPointType.Waypoint;
+  //   // }
+  //   requestPoints.add(
+  //     RequestPoint(
+  //       Point(latitude: marker.latitude, longitude: marker.longitude), 
+  //       typePoint, 
+  //       null, null, null,
+  //     ),
+  //   );
+  // }
+
   
+  // if (requestPoints.length >= 2 && requestPoints.length < 13) {
+  //   requestPoints.add(RequestPoint(
+  //     Point(latitude: markers.first.latitude, longitude: markers.first.longitude), 
+  //     RequestPointType.Waypoint, 
+  //     null, null, null,
+  //   ));
+  // }
+  // if (requestPoints.where((point) {return point.type == RequestPointType.Waypoint;}).length >= 2 && requestPoints.length < 13) {
+    await routeManager.buildRoute(requestPoints: requestPoints);
+  // }
+  return routeManager;
+}
+
+Future<void> showRouteFromPage(PedestrianRouteManager routeManager, List<MarkerMap> markers, BuildContext context, double height) async {
+  selectedIndex.value = 1;
+  showOtherRoutePage.value = routeManager;
+  
+  
+  if (mapWindow_ != null) {
+    markersMap = markers;
+    removePoints();
+    // await makePoints(mapWindow_!, markersMap);
+    await routeManager.showRouteOnMap(0, mapWindow_!, height);
+  }
+}
+
+Future<void> hideRouteFromPage(MapWindow mapWindow, PedestrianRouteManager routeManager) async {
+  routeManager.cancelAllSessions();
+  removePoints();
+  await makePoints(mapWindow, markersMap);
 }

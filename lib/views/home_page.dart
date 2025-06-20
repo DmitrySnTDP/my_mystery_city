@@ -6,7 +6,7 @@ import 'package:my_mystery_city/views/profile_page.dart';
 import 'categories_page.dart';
 
 
-final ValueNotifier<int> selectedIndex = ValueNotifier(0);
+final ValueNotifier<int> selectedIndex = ValueNotifier(1);
 
 
 

@@ -37,7 +37,7 @@ Widget startHelpWidget(String text, {double? leftPos, double? rightPos, double? 
   );
 }
 
-Widget errorHelpWidget(String text, {double? leftPos, double? rightPos, double? topPos, double? bottomPos, double height = 50, VoidCallback? buttonFunc}) {
+Widget errorHelpWidget(String text, {double? leftPos, double? rightPos, double? topPos, double? bottomPos, double height = 50, double width = 225, VoidCallback? buttonFunc, String buttonText = "Понятно"}) {
   return Positioned(
     left: leftPos,
     right: rightPos,
@@ -56,7 +56,7 @@ Widget errorHelpWidget(String text, {double? leftPos, double? rightPos, double? 
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           SizedBox(
-            width: 225,
+            width: width,
             child: Text(
               textAlign: TextAlign.center,
               text,
@@ -73,7 +73,7 @@ Widget errorHelpWidget(String text, {double? leftPos, double? rightPos, double? 
                 
               ),
               child: Text(
-                "Понятно",
+                buttonText,
                 style: TextStyle(
                   fontSize: 14,
                   color: Colors.white,
