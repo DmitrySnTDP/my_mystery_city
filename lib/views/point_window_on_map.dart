@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:my_mystery_city/controllers/map_state.dart';
 import 'package:my_mystery_city/data/db_worker.dart';
 import 'package:my_mystery_city/main.dart';
 import 'package:my_mystery_city/views/more_info_point_page.dart';
@@ -26,7 +27,7 @@ class MarkerOverlay extends StatelessWidget {
       right: 0,
       child: DraggableScrollableSheet(
         expand: false,
-        initialChildSize: marker.isChecked == 1? 1.0: 0.5,
+        initialChildSize: marker.isChecked == 1? 0.8: showOtherRoutePage.value == null? 0.5: 0.35,
         minChildSize: 0.05, 
         maxChildSize: marker.isChecked == 1? 1.0: 0.5,
         builder: (context, scrollController) {
@@ -162,25 +163,26 @@ class MarkerOverlay extends StatelessWidget {
             ],
           ),
         ),
-        Padding(
-          padding: EdgeInsets.only(left: 16, right: 16, top: 17, bottom: 0),
-          child: TextButton(
-            onPressed: onCreateRoot,
-            style: ButtonStyle(
-              backgroundColor: WidgetStateProperty.all(orangeColor),
-              shape: WidgetStateProperty.all(
-                RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
+        if (showOtherRoutePage.value == null)
+          Padding(
+            padding: EdgeInsets.only(left: 16, right: 16, top: 17, bottom: 0),
+            child: TextButton(
+              onPressed: onCreateRoot,
+              style: ButtonStyle(
+                backgroundColor: WidgetStateProperty.all(orangeColor),
+                shape: WidgetStateProperty.all(
+                  RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
                 ),
+              padding: WidgetStatePropertyAll(EdgeInsets.symmetric(horizontal: 65.5, vertical: 14.5)),
               ),
-            padding: WidgetStatePropertyAll(EdgeInsets.symmetric(horizontal: 65.5, vertical: 14.5)),
-            ),
-            child: Text(
-              "Составить маршрут",
-              style: TextStyle(fontSize: 19, color: Colors.white),
+              child: Text(
+                "Составить маршрут",
+                style: TextStyle(fontSize: 19, color: Colors.white),
+              ),
             ),
           ),
-        ),
       ];
     }
     
@@ -202,25 +204,26 @@ class MarkerOverlay extends StatelessWidget {
             ),
           ]
         ),
-        Padding(
-          padding: EdgeInsets.only(left: 16, right: 16, top: 17, bottom: 0),
-          child: TextButton(
-            onPressed: onCreateRoot,
-            style: ButtonStyle(
-              backgroundColor: WidgetStateProperty.all(orangeColor),
-              shape: WidgetStateProperty.all(
-                RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
+        if (showOtherRoutePage.value == null)
+          Padding(
+            padding: EdgeInsets.only(left: 16, right: 16, top: 17, bottom: 0),
+            child: TextButton(
+              onPressed: onCreateRoot,
+              style: ButtonStyle(
+                backgroundColor: WidgetStateProperty.all(orangeColor),
+                shape: WidgetStateProperty.all(
+                  RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
                 ),
+              padding: WidgetStatePropertyAll(EdgeInsets.symmetric(horizontal: 65.5, vertical: 14.5)),
               ),
-            padding: WidgetStatePropertyAll(EdgeInsets.symmetric(horizontal: 65.5, vertical: 14.5)),
-            ),
-            child: Text(
-              "Составить маршрут",
-              style: TextStyle(fontSize: 19, color: Colors.white),
+              child: Text(
+                "Составить маршрут",
+                style: TextStyle(fontSize: 19, color: Colors.white),
+              ),
             ),
           ),
-        ),
       ];
     }
   }

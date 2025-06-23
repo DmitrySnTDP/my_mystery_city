@@ -196,28 +196,29 @@ class _MapPageState extends State<MapPage> {
               child: Icon(Icons.near_me),
             ),
           ),
-          Positioned(
-            bottom: 75 + extraHeightButtons,
-            right: 0,
-            child: ElevatedButton(
-              onPressed: () {
-                setState(() {
-                  if (firstTapNear) {
-                      firstTapNear = false;
-                      firsTapGeo = true;
-                  }
-                  showNearPlace(mapWindow_!).then((_) {});
-                });
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: orangeColor,
-                iconColor: Colors.white,
-                shape: CircleBorder(),
-                iconSize: 20,
+          if (showOtherRoutePage.value == null)
+            Positioned(
+              bottom: 75 + extraHeightButtons,
+              right: 0,
+              child: ElevatedButton(
+                onPressed: () {
+                  setState(() {
+                    if (firstTapNear) {
+                        firstTapNear = false;
+                        firsTapGeo = true;
+                    }
+                    showNearPlace(mapWindow_!);
+                  });
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: orangeColor,
+                  iconColor: Colors.white,
+                  shape: CircleBorder(),
+                  iconSize: 20,
+                ),
+                child: Icon(Icons.search),
               ),
-              child: Icon(Icons.search),
             ),
-          ),
           if (tappedMarker.value != null) 
             MarkerOverlay(
               marker: tappedMarker.value!,
@@ -242,8 +243,10 @@ class _MapPageState extends State<MapPage> {
                       )
                     ]
                   );
-                  tappedMarker.value = null;
-                  showRouteNum.value = 0;
+                  setState(() {
+                    tappedMarker.value = null;
+                    showRouteNum.value = 0;
+                  });
                   routeManager.showRouteOnMap(showRouteNum.value!, mapWindow_!, windowWidth);
                 }
                 else {

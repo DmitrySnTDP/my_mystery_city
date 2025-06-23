@@ -29,7 +29,8 @@ Future<List<MarkerMap>> getMarkerForMap() async {
 Position? userPosition;
 PlacemarkMapObject? userLocationPlacemark;
 ClusterizedPlacemarkCollection? markerCollections;
-final fl_material.ValueNotifier<Position?> userLocation = fl_material.ValueNotifier(null);
+// MapObjectCollection? markerCollections;
+// final fl_material.ValueNotifier<Position?> userLocation = fl_material.ValueNotifier(null);
 final fl_material.ValueNotifier<MarkerMap?> tappedMarker = fl_material.ValueNotifier(null);
 final fl_material.ValueNotifier<int?> showRouteNum = fl_material.ValueNotifier(null);
 final fl_material.ValueNotifier<bool> showMoreInfoCheck = fl_material.ValueNotifier(false);
@@ -41,8 +42,8 @@ final MapObjectTapListenerImpl tabMarkerListener = MapObjectTapListenerImpl(onMa
       getMarkerMap(mapObject.geometry.latitude, mapObject.geometry.longitude).then((marker) {
         tappedMarker.value = marker;
         showRouteNum.value = null;
-      continueLogic();
-      });  
+        continueLogic();
+      });
     }
     return true;
   }
@@ -63,9 +64,9 @@ void continueLogic() {
       removePoints();
       tappedMarker.value!.isChecked = 1;
       updateMarkerMapExploreStatus(tappedMarker.value!);
-      getMarkerForMap().then(
+      getMarkerForMap().then (
         (_) async {
-          await makePoints(mapWindow_!, markersMap);
+          makePoints(mapWindow_!, markersMap);
         }
       );
       
@@ -77,16 +78,14 @@ void continueLogic() {
 Future<Position?> determinePosition() async {
   // Проверка, включен ли GPS
   if (!await checkEnableGeo()) {
-    return userLocation.value = null;
-    // return;
+    return null;
   }
   // Проверка разрешений
   if (!await checkPermissionGeo()){
-    return userLocation.value = null;
-    // return;
+    return null;
   }
   // Получение текущей позиции
-  return userLocation.value = await Geolocator.getCurrentPosition();
+  return await Geolocator.getCurrentPosition();
 }
 
 Future<bool> checkPermissionGeo() async {
@@ -157,7 +156,9 @@ void moveToUserLocation(MapWindow mapWindow_, {bool start = false}) async
 }
 
 void removePoints() {
-    markerCollections?.clear();
+  markerCollections?.removeTapListener(tabMarkerListener);
+  // markerCollections?.clear();
+  mapWindow_?.map.mapObjects.remove(markerCollections!);
 }
 
 void addPoint(MarkerMap marker) {
@@ -166,13 +167,14 @@ void addPoint(MarkerMap marker) {
 }
 
 Future<void> makePoints(MapWindow mapWindow_, List<MarkerMap> markers) async {
-    markerCollections =  mapWindow_.map.mapObjects.addClusterizedPlacemarkCollection(clusterListener);
-    // final dbData = await getData();
-
+    markerCollections = mapWindow_.map.mapObjects.addClusterizedPlacemarkCollection(clusterListener);
+    // markerCollections = mapWindow_.map.mapObjects.addCollection();
+    markerCollections!.addTapListener(tabMarkerListener);
+    
     for (final marker in markers) {
       addPoint(marker);
     }
-    markerCollections!.addTapListener(tabMarkerListener);
+    
     markerCollections!.clusterPlacemarks(clusterRadius: 40, minZoom: 15);
 }
 
