@@ -20,6 +20,7 @@ import 'package:yandex_maps_mapkit/image.dart' as image_provider;
 var errorGeoWidgetCheck = false;
 var createRouteErrorWidgetCheck = false;
 var firsTapGeo = false;
+var firstTapNear = false;
 late List<MarkerMap> markersMap;
 
 Future<List<MarkerMap>> getMarkerForMap() async {
@@ -29,7 +30,6 @@ Future<List<MarkerMap>> getMarkerForMap() async {
 Position? userPosition;
 PlacemarkMapObject? userLocationPlacemark;
 ClusterizedPlacemarkCollection? markerCollections;
-// MapObjectCollection? markerCollections;
 // final fl_material.ValueNotifier<Position?> userLocation = fl_material.ValueNotifier(null);
 final fl_material.ValueNotifier<MarkerMap?> tappedMarker = fl_material.ValueNotifier(null);
 final fl_material.ValueNotifier<int?> showRouteNum = fl_material.ValueNotifier(null);
@@ -64,11 +64,11 @@ void continueLogic() {
       removePoints();
       tappedMarker.value!.isChecked = 1;
       updateMarkerMapExploreStatus(tappedMarker.value!);
-      getMarkerForMap().then (
-        (_) async {
+      // getMarkerForMap().then (
+        // (_) async {
           makePoints(mapWindow_!, markersMap);
-        }
-      );
+        // }
+      // );
       
     }
   }
@@ -156,9 +156,9 @@ void moveToUserLocation(MapWindow mapWindow_, {bool start = false}) async
 }
 
 void removePoints() {
-  markerCollections?.removeTapListener(tabMarkerListener);
-  // markerCollections?.clear();
-  mapWindow_?.map.mapObjects.remove(markerCollections!);
+  // markerCollections!.removeTapListener(tabMarkerListener);
+  markerCollections!.clear();
+  // mapWindow_?.map.mapObjects.remove(markerCollections!);
 }
 
 void addPoint(MarkerMap marker) {
@@ -170,12 +170,13 @@ Future<void> makePoints(MapWindow mapWindow_, List<MarkerMap> markers) async {
     markerCollections = mapWindow_.map.mapObjects.addClusterizedPlacemarkCollection(clusterListener);
     // markerCollections = mapWindow_.map.mapObjects.addCollection();
     markerCollections!.addTapListener(tabMarkerListener);
+    final dbData = await getData();
     
-    for (final marker in markers) {
+    for (final marker in dbData) {
       addPoint(marker);
     }
     
-    markerCollections!.clusterPlacemarks(clusterRadius: 40, minZoom: 15);
+    markerCollections!.clusterPlacemarks(clusterRadius: 40.0, minZoom: 15);
 }
 
 Future<void> showNearPlace(MapWindow mapWindow) async {

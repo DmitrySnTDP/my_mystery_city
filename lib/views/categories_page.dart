@@ -376,7 +376,6 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                       ),
                       TextButton(
                         onPressed: () {
-                          // Navigator.pop(context);
                           openMoreInfo(context, marker);
                         },
                         style: ButtonStyle(

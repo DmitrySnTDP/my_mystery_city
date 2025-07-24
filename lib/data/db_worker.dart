@@ -1,3 +1,4 @@
+import 'package:my_mystery_city/controllers/map_state.dart';
 import 'package:my_mystery_city/data/reader_json.dart';
 import 'package:my_mystery_city/enums/routes_enum.dart';
 import 'package:my_mystery_city/enums/type_point_enum.dart';
@@ -7,10 +8,8 @@ import 'package:yandex_maps_mapkit/mapkit.dart' as mapkit;
 
 
 Database? database;
-var firstTapNear = false;
 
 Future<List<MarkerMap>> getData() async {
-  await checkOpenDB();
   return await getMarkersMap();
 }
 
@@ -65,20 +64,17 @@ class MarkerMap {
 Future<void> checkDB() async {
   var path = join(await getDatabasesPath(), "assets/db/db_local.db");
   var exists = await databaseExists(path);
+  
 
   if (!exists) {
     await createFillTable();
     firstTapNear = true;
   }
-}
-
-Future<void> checkOpenDB() async {
-  database ??= await openDatabase(join(await getDatabasesPath(), "assets/db/db_local.db"));
+  database = await openDatabase(join(await getDatabasesPath(), "assets/db/db_local.db"));
 }
 
 Future<void> createFillTable() async {
   await createTable();
-  await checkOpenDB();
   var markers = await readMarkersFromJson("assets/db/points.json");
   for (var marker in markers)
   {
@@ -88,7 +84,7 @@ Future<void> createFillTable() async {
 
 Future<void>createTable() async {
   // ignore: unused_local_variable
-  var database_ = await openDatabase(join(await getDatabasesPath(), "assets/db/db_local.db"),
+  database = await openDatabase(join(await getDatabasesPath(), "assets/db/db_local.db"),
     onCreate: (db, version) {
       return db.execute(
         'CREATE TABLE markers_data (latitude REAL NOT NULL, longitude	REAL NOT NULL, type_point	INTEGER NOT NULL DEFAULT 1 CHECK(type_point >= 1 AND type_point <= 5), is_checked	BLOB NOT NULL, name	TEXT,	description	TEXT, route_name TEXT, img_link TEXT,	PRIMARY KEY(latitude, longitude))',
@@ -99,9 +95,7 @@ Future<void>createTable() async {
 }
 
 Future<List<MarkerMap>> getMarkersMap() async {
-  await checkOpenDB();
   final db = database!;
-
   final List<Map<String, Object?>> markersMaps = await db.query('markers_data');
 
   return [
@@ -129,7 +123,6 @@ Future<List<MarkerMap>> getMarkersMap() async {
 }
 
 Future<void> insertMarker(MarkerMap marker) async {
-  await checkOpenDB();
   final db = database!;
   await db.insert(
     'markers_data',
@@ -139,7 +132,6 @@ Future<void> insertMarker(MarkerMap marker) async {
 }
 
 Future<void> deleteMarkerMap(String name) async {
-  await checkOpenDB();
   final db = database!;
   await db.delete(
     'markers_data',
@@ -149,7 +141,6 @@ Future<void> deleteMarkerMap(String name) async {
 }
 
 Future<void> updateMarkerMapExploreStatus(MarkerMap marker) async {
-  await checkOpenDB();
   final db = database!;
   await db.update(
     'markers_data',
@@ -160,7 +151,6 @@ Future<void> updateMarkerMapExploreStatus(MarkerMap marker) async {
 }
 
 Future<List<MarkerMap>> getMarkerMapInRadius(mapkit.Point userPoint, double dLatitude, double dLongitude) async {
-  await checkOpenDB();
   final db = database!;
   List<MarkerMap> markers = [];
   final markersData = await db.query(
@@ -175,7 +165,6 @@ Future<List<MarkerMap>> getMarkerMapInRadius(mapkit.Point userPoint, double dLat
 }
 
 Future<MarkerMap?> getMarkerMap(double latitude, double longitude) async {
-  await checkOpenDB();
   final db = database!;
   final result = await db.query(
     'markers_data',
@@ -191,7 +180,6 @@ Future<MarkerMap?> getMarkerMap(double latitude, double longitude) async {
 }
 
 Future<List<MarkerMap>> getMarkersMapOnRoute(RouteType routeType) async {
-  await checkOpenDB();
   final db = database!;
   List<MarkerMap> markers = [];
   final markersData = await db.query(
@@ -206,7 +194,6 @@ Future<List<MarkerMap>> getMarkersMapOnRoute(RouteType routeType) async {
 }
 
 Future<List<MarkerMap>> getMarkersMapOnType(TypePoint type) async {
-  await checkOpenDB();
   final db = database!;
   List<MarkerMap> markers = [];
   final markersData = await db.query(
