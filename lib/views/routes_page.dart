@@ -3,13 +3,14 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:my_mystery_city/controllers/map_state.dart';
-import 'package:my_mystery_city/controllers/root_creater.dart';
+// import 'package:my_mystery_city/controllers/root_creater.dart';
 // import 'package:my_mystery_city/controllers/root_creater.dart';
 // import 'package:flutter/rendering.dart';
 import 'package:my_mystery_city/data/db_worker.dart';
 import 'package:my_mystery_city/enums/routes_enum.dart';
 import 'package:my_mystery_city/main.dart';
 import 'package:my_mystery_city/views/help_widgets.dart';
+import 'package:my_mystery_city/views/home_page.dart';
 import 'package:my_mystery_city/views/route_more_info_page.dart';
 
 Map<RouteType, List<MarkerMap>> routesData = {};
@@ -168,11 +169,13 @@ class _RoutesPageState extends State<RoutesPage> {
 
 Iterable<Widget> getRoutesPreview(BuildContext context, List<RouteType> routes,  VoidCallback onError,) sync* {
   for (var route in routes) {
-    yield FutureBuilder<PedestrianRouteManager>(
+    yield FutureBuilder<List<double>>(
       future: createRouteFromMarkers(routesData[route]!),
-      builder: (cotext, snapshot) 
+      builder: (context, snapshot) 
       {
-        final routeManager = snapshot.data;
+        final routesId = snapshot.data;
+        final routeTime = getRouteTime(routesId);
+        final routeDistance = getRouteDistance(routesId);
         return Container(
           decoration: const BoxDecoration(
             color: Colors.white,
@@ -217,7 +220,7 @@ Iterable<Widget> getRoutesPreview(BuildContext context, List<RouteType> routes, 
                           size: 24,
                         ),
                         Text(
-                          routeManager != null && routeManager.pedestrianRoutes.length > 1? routeManager.pedestrianRoutes.first.metadata.weight.time.text : "??",
+                          routeTime,
                           style: TextStyle(
                             fontSize: 13,
                           ),
@@ -230,7 +233,7 @@ Iterable<Widget> getRoutesPreview(BuildContext context, List<RouteType> routes, 
                           size: 24,
                         ),
                         Text(
-                          routeManager != null && routeManager.pedestrianRoutes.length > 1? routeManager.pedestrianRoutes.first.metadata.weight.walkingDistance.text: "??",
+                          routeDistance,
                           style: TextStyle(
                             fontSize: 13,
                           ),
@@ -243,12 +246,15 @@ Iterable<Widget> getRoutesPreview(BuildContext context, List<RouteType> routes, 
                       children: [
                         TextButton(
                           onPressed: () {
-                            final height = MediaQuery.of(context).size.height;
-                            if (routeManager != null) {
+                            // final height = MediaQuery.of(context).size.height;
+                            if (routesId != null && routesId.isNotEmpty) {
                               Navigator.pop(context);
-                              showRouteFromPage(routeManager, routesData[route]!, context, height);
+                              selectedIndex.value = 1;
+                              showOtherRoutePageId.value = routesId;
+                              markersMap = routesData[route]!;
+                              // showRouteFromPage(routesId, routesData[route]!, context);
                             }
-                            else {
+                            else { 
                               onError;
                             }
                           },
@@ -270,7 +276,7 @@ Iterable<Widget> getRoutesPreview(BuildContext context, List<RouteType> routes, 
                         ),
                         TextButton(
                           onPressed: () {
-                            openRouteMoreInfoPage(context, routesData[route]!, route, routeManager);
+                            openRouteMoreInfoPage(context, routesData[route]!, route, routeDistance, routeTime);
                           },
                           style: ButtonStyle(
                             padding: WidgetStateProperty.all(EdgeInsets.zero),

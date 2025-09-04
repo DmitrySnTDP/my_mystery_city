@@ -1,12 +1,14 @@
 import 'dart:async';
 import 'dart:core';
+import 'dart:math';
 
 import 'package:flutter/material.dart' as fl_material ;
 import 'package:flutter/widgets.dart' hide Animation;
 import 'package:geolocator/geolocator.dart';
 import 'package:my_mystery_city/controllers/root_creater.dart';
 import 'package:my_mystery_city/controllers/search_nearest_place.dart';
-import 'package:my_mystery_city/views/home_page.dart';
+import 'package:my_mystery_city/enums/type_point_enum.dart';
+// import 'package:my_mystery_city/views/home_page.dart';
 
 import 'package:my_mystery_city/views/map_page.dart';
 import 'package:my_mystery_city/data/db_worker.dart';
@@ -34,7 +36,8 @@ ClusterizedPlacemarkCollection? markerCollections;
 final fl_material.ValueNotifier<MarkerMap?> tappedMarker = fl_material.ValueNotifier(null);
 final fl_material.ValueNotifier<int?> showRouteNum = fl_material.ValueNotifier(null);
 final fl_material.ValueNotifier<bool> showMoreInfoCheck = fl_material.ValueNotifier(false);
-final fl_material.ValueNotifier<PedestrianRouteManager?> showOtherRoutePage = fl_material.ValueNotifier(null);
+final fl_material.ValueNotifier<List<double>> showOtherRoutePageId = fl_material.ValueNotifier(<double>[]);
+// final fl_material.ValueNotifier<double> indetificatorRoute = fl_material.ValueNotifier(double.nan);
 
 final MapObjectTapListenerImpl tabMarkerListener = MapObjectTapListenerImpl(onMapObjectTapped:
   (mapObject , point ) {
@@ -64,11 +67,11 @@ void continueLogic() {
       removePoints();
       tappedMarker.value!.isChecked = 1;
       updateMarkerMapExploreStatus(tappedMarker.value!);
-      // getMarkerForMap().then (
-        // (_) async {
-          makePoints(mapWindow_!, markersMap);
-        // }
-      // );
+      getMarkerForMap().then (
+        (_) async {
+          await makePoints(mapWindow_!, markersMap);
+        }
+      );
       
     }
   }
@@ -170,9 +173,9 @@ Future<void> makePoints(MapWindow mapWindow_, List<MarkerMap> markers) async {
     markerCollections = mapWindow_.map.mapObjects.addClusterizedPlacemarkCollection(clusterListener);
     // markerCollections = mapWindow_.map.mapObjects.addCollection();
     markerCollections!.addTapListener(tabMarkerListener);
-    final dbData = await getData();
+    // final dbData = await getData();
     
-    for (final marker in dbData) {
+    for (final marker in markers) {
       addPoint(marker);
     }
     
@@ -229,70 +232,75 @@ void moveToTappedMarker() {
 }
 
 
-Future<PedestrianRouteManager> createRouteFromMarkers(List<MarkerMap> markers) async {
-  final routeManager = PedestrianRouteManager();  
-  List<RequestPoint> requestPoints = [
-    RequestPoint(
-      Point(latitude: markers[1].latitude, longitude: markers[1].longitude), 
-      RequestPointType.Waypoint, 
-      null, null, null,
-    ),
-    RequestPoint(
-      Point(latitude: markers[markers.length - 2].latitude, longitude: markers[markers.length - 2].longitude), 
-      RequestPointType.Waypoint, 
-      null, null, null,
-    ),
-  ];
-  // await addUserLocationPlacemark();
-  // await determinePosition();
-  // if (userLocation.value != null) {
-  //   requestPoints.add(
-  //     RequestPoint(
-  //       Point(latitude: userLocation.value!.latitude, longitude: userLocation.value!.longitude), 
-  //       RequestPointType.Waypoint, 
-  //       null, null, null,
-  //     )
-  //   );
-  // }
-
-  // for (final marker in markers) {
-  //   var typePoint = RequestPointType.Waypoint;
-  //   // if (marker == markers.first) {
-  //   //   typePoint = RequestPointType.Waypoint;
-  //   // }
-  //   requestPoints.add(
-  //     RequestPoint(
-  //       Point(latitude: marker.latitude, longitude: marker.longitude), 
-  //       typePoint, 
-  //       null, null, null,
-  //     ),
-  //   );
-  // }
-
+Future<List<double>> createRouteFromMarkers(List<MarkerMap> markers) async {
+  var markers_ = <MarkerMap>[];
+  markers_.addAll(markers);
+  var routesId = <double>[];
+  MarkerMap? userloc;
+  if (userLocationPlacemark == null) {
+    await addUserLocationPlacemark();
+    await determinePosition();
+  }
   
-  // if (requestPoints.length >= 2 && requestPoints.length < 13) {
-  //   requestPoints.add(RequestPoint(
-  //     Point(latitude: markers.first.latitude, longitude: markers.first.longitude), 
-  //     RequestPointType.Waypoint, 
-  //     null, null, null,
-  //   ));
-  // }
-  // if (requestPoints.where((point) {return point.type == RequestPointType.Waypoint;}).length >= 2 && requestPoints.length < 13) {
-    await routeManager.buildRoute(requestPoints: requestPoints);
-  // }
-  return routeManager;
+  if (userLocationPlacemark != null) {
+    userloc = MarkerMap(
+      latitude: userLocationPlacemark!.geometry.latitude,
+      longitude: userLocationPlacemark!.geometry.longitude,
+      typePoint: TypePoint.intrestingPlace,
+      isChecked: 0,
+      name: "",
+      description: "",
+      routeName: "",
+      imgLink: List.empty()
+    );
+  }
+  MarkerMap? startPos;
+  MarkerMap? endPos;
+  for (var i = 0; markers_.isNotEmpty; i++) {
+    if (i == 0 && userloc != null) {
+      startPos = userloc;
+      endPos = getNearMarker(markers_, userloc);
+    }
+    else {
+      if (startPos == null) {
+        startPos = markers_[0];
+      }
+      else {
+        startPos = endPos;
+      }
+      markers_.remove(startPos);
+      endPos = getNearMarker(markers_, startPos!);
+    }
+    List<RequestPoint> requestPoints = [
+      RequestPoint(
+        Point(latitude: startPos.latitude, longitude: startPos.longitude), 
+        RequestPointType.Waypoint, 
+        null, null, null,
+      ),
+      RequestPoint(
+        Point(latitude: endPos.latitude, longitude: endPos.longitude), 
+        RequestPointType.Waypoint, 
+        null, null, null,
+      ),
+    ];
+    routesId.add(await routeManager.buildRoute(requestPoints: requestPoints));
+  }
+  return routesId;
 }
 
-Future<void> showRouteFromPage(PedestrianRouteManager routeManager, List<MarkerMap> markers, BuildContext context, double height) async {
-  selectedIndex.value = 1;
-  showOtherRoutePage.value = routeManager;
+Future<void> showRouteFromPage(List<double> routesId, List<MarkerMap> markers, BuildContext context) async {
+  // selectedIndex.value = 1;
+  // showOtherRoutePageId.value = routesId;
   
   
   if (mapWindow_ != null) {
-    markersMap = markers;
+    // markersMap = markers;
     removePoints();
-    // await makePoints(mapWindow_!, markersMap);
-    await routeManager.showRouteOnMap(0, mapWindow_!, height);
+    await makePoints(mapWindow_!, markersMap);
+    
+    for (var id in routesId) {
+      routeManager.showRouteOnMap(id, 0);
+    }
   }
 }
 
@@ -300,4 +308,64 @@ Future<void> hideRouteFromPage(MapWindow mapWindow, PedestrianRouteManager route
   routeManager.cancelAllSessions();
   removePoints();
   await makePoints(mapWindow, markersMap);
+}
+
+MarkerMap getNearMarker(List<MarkerMap> markers, MarkerMap point) {
+  var nearestMarker = point;
+  var minDistance = double.maxFinite;
+
+  for (var marker in markers) {
+    var distance = sqrt(pow((marker.latitude - point.latitude).abs(), 2) + pow((marker.longitude - point.longitude).abs(), 2)); 
+    if (distance < minDistance) {
+      minDistance = distance;
+      nearestMarker = marker;
+    }
+  }
+  return nearestMarker;
+}
+
+
+String getRouteTime(List<double>? routesId) {
+  if (routesId == null || routesId.isEmpty) {
+    return "??";
+  }
+  var time = 0.0;
+  for (var id in routesId) {
+    if (routeManager.routesInfo.containsKey(id)) {
+      time += routeManager.routesInfo[id]!.pedestrianRoutes.first.metadata.weight.time.value; 
+    }
+  }
+  if (time > 0 && time <= 60) {
+    return "${time.round().toString()} сек";
+  }
+  else if (time > 60 && time <= 3600) {
+    return "${(time / 60).round().toString()} мин";
+  }
+  else if (time > 3600) {
+    return "${(time / 3600).toStringAsFixed(1).toString()} ч";
+  }
+  else {
+    return time.toString();
+  }
+}
+
+String getRouteDistance(List<double>? routesId) {
+  if (routesId == null || routesId.isEmpty) {
+    return "??";
+  }
+  var distance = 0.0;
+  for (var id in routesId) {
+    if (routeManager.routesInfo.containsKey(id)) {
+      distance += routeManager.routesInfo[id]!.pedestrianRoutes.first.metadata.weight.walkingDistance.value; 
+    }
+  }
+  if (distance < 1000) {
+    return "${distance.round().toString()} м";
+  }
+  else if (distance > 1000) {
+    return "${(distance / 1000).toStringAsFixed(1).toString()} км";
+  }
+  else {
+    return distance.toString();
+  }
 }

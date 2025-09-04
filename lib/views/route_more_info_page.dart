@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:my_mystery_city/controllers/root_creater.dart';
+// import 'package:my_mystery_city/controllers/root_creater.dart';
 import 'package:my_mystery_city/data/db_worker.dart';
 import 'package:my_mystery_city/enums/routes_enum.dart';
 import 'package:my_mystery_city/views/more_info_point_page.dart';
 
 
-void openRouteMoreInfoPage(BuildContext context, List<MarkerMap> markers, RouteType route, PedestrianRouteManager? routeManager) {
+void openRouteMoreInfoPage(BuildContext context, List<MarkerMap> markers, RouteType route, String routeDistance, String routeTime) {
   Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => RouteMoreInfoPage(markers: markers, route: route, routeManager: routeManager),
+        builder: (_) => RouteMoreInfoPage(markers: markers, route: route, routeDistance: routeDistance, routeTime: routeTime),
       ),
     );
 }
@@ -17,8 +17,10 @@ void openRouteMoreInfoPage(BuildContext context, List<MarkerMap> markers, RouteT
 class RouteMoreInfoPage extends StatefulWidget {
   final List<MarkerMap> markers;
   final RouteType route;
-  final PedestrianRouteManager? routeManager;
-  const RouteMoreInfoPage({super.key, required this.markers, required this.route, required this.routeManager});
+  final String routeDistance;
+  final String routeTime;
+  // final PedestrianRouteManager? routeManager;
+  const RouteMoreInfoPage({super.key, required this.markers, required this.route, required this.routeDistance, required this.routeTime});
 
   @override
   State<RouteMoreInfoPage> createState() => _RouteMoreInfoPageState();
@@ -71,7 +73,7 @@ class _RouteMoreInfoPageState extends State<RouteMoreInfoPage> {
                           size: 24,
                         ),
                         Text(
-                          widget.routeManager != null && widget.routeManager!.pedestrianRoutes.length > 1? widget.routeManager!.pedestrianRoutes.first.metadata.weight.time.text: "??",
+                          widget.routeTime,
                           style: TextStyle(
                             fontSize: 13,
                           ),
@@ -84,7 +86,7 @@ class _RouteMoreInfoPageState extends State<RouteMoreInfoPage> {
                           size: 24,
                         ),
                         Text(
-                          widget.routeManager != null && widget.routeManager!.pedestrianRoutes.length > 1? widget.routeManager!.pedestrianRoutes.first.metadata.weight.walkingDistance.text: "??",
+                          widget.routeDistance,
                           style: TextStyle(
                             fontSize: 13,
                           ),

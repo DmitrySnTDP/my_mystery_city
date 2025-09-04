@@ -18,6 +18,7 @@ import 'package:yandex_maps_mapkit/yandex_map.dart';
 StreamSubscription<Position>? _positionStream;
 
 MapWindow? mapWindow_;
+final routeManager = PedestrianRouteManager();
 
 
 class MapPage extends StatefulWidget {
@@ -29,7 +30,7 @@ class MapPage extends StatefulWidget {
 class _MapPageState extends State<MapPage> {
   VoidCallback? _listener;
   late final double windowWidth;
-  late final PedestrianRouteManager routeManager;
+  double indetificatorRoute = double.nan;
   var defaultPoint = Point(latitude: 56.837716, longitude: 60.596828); // убрать с костылём зума на екб
   int? lastRouteNumValue; 
 
@@ -37,16 +38,12 @@ class _MapPageState extends State<MapPage> {
   void initState() {
     super.initState();
 
-    setState(() {
-      routeManager = PedestrianRouteManager();
-    });
-
     _listener = () {
       if (mounted) setState(() {});
     };
     tappedMarker.addListener(_listener!);
     showRouteNum.addListener(_listener!);
-    showOtherRoutePage.addListener(_listener!);
+    showOtherRoutePageId.addListener(_listener!);
 
     checkEnableGeo().then(
       (checkResult) {
@@ -87,8 +84,8 @@ class _MapPageState extends State<MapPage> {
     _positionStream?.cancel();
     tappedMarker.removeListener(_listener!);
     showRouteNum.removeListener(_listener!);
-    showOtherRoutePage.removeListener(_listener!);
-    routeManager.cancelAllSessions();
+    showOtherRoutePageId.removeListener(_listener!);
+    routeManager.routesCollection?.clear();
     super.dispose();
   }
 
@@ -98,9 +95,14 @@ class _MapPageState extends State<MapPage> {
 
   if (showRouteNum.value != lastRouteNumValue) {
     if (showRouteNum.value == null) {
-      routeManager.cancelAllSessions();
+      routeManager.cancelRoute(indetificatorRoute);
+      indetificatorRoute = double.nan;
     }
     lastRouteNumValue = showRouteNum.value;
+  }
+
+  if (showOtherRoutePageId.value.isNotEmpty) {
+    showRouteFromPage(showOtherRoutePageId.value, markersMap, context);
   }
 
   var extraHeightButtons = 0.0;
@@ -125,6 +127,9 @@ class _MapPageState extends State<MapPage> {
             onMapCreated: (mapWindow) async {
               mapWindow_ = mapWindow;
               mapWindow.map.setMapStyle(await readJsonFile("assets/style/style_map.json"));
+              setState(() {
+                routeManager.routesCollection = mapWindow_!.map.mapObjects.addCollection();
+              });
               // Костыль, чтобы пока позиция пользователя загружалась, карта заранее смотрела на Екатеринбург, а не на весь мир
               mapWindow_!.map.move(CameraPosition(defaultPoint, zoom: 12.5, azimuth: 0.0, tilt: 30.0));
               mapkit.onStart();
@@ -195,7 +200,7 @@ class _MapPageState extends State<MapPage> {
               child: Icon(Icons.near_me),
             ),
           ),
-          if (showOtherRoutePage.value == null)
+          if (showOtherRoutePageId.value.isEmpty)
             Positioned(
               bottom: 75 + extraHeightButtons,
               right: 0,
@@ -230,7 +235,7 @@ class _MapPageState extends State<MapPage> {
               },
               onCreateRoot: () async {
                 if (userLocationPlacemark != null){
-                  await routeManager.buildRoute(
+                  indetificatorRoute = await routeManager.buildRoute(
                     requestPoints: [
                       RequestPoint(
                         Point(latitude: userLocationPlacemark!.geometry.latitude, longitude: userLocationPlacemark!.geometry.longitude),
@@ -246,7 +251,7 @@ class _MapPageState extends State<MapPage> {
                     tappedMarker.value = null;
                     showRouteNum.value = 0;
                   });
-                  routeManager.showRouteOnMap(showRouteNum.value!, mapWindow_!, windowWidth);
+                  routeManager.showRouteOnMap(indetificatorRoute, showRouteNum.value!, width: windowWidth, mapWindow: mapWindow_);
                 }
                 else {
                   setState(() {
@@ -257,10 +262,10 @@ class _MapPageState extends State<MapPage> {
             ),
           if (showRouteNum.value != null)
             RouteOverlay(
-              routesData: routeManager.pedestrianRoutes,
+              routesData: routeManager.routesInfo[indetificatorRoute]!.pedestrianRoutes,
               func: (int index) {
                 showRouteNum.value = index;
-                routeManager.showRouteOnMap(index, mapWindow_!, windowWidth);
+                routeManager.showRouteOnMap(indetificatorRoute, index, width: windowWidth, mapWindow: mapWindow_);
               },
               onClose: () {
                 setState(
@@ -271,7 +276,7 @@ class _MapPageState extends State<MapPage> {
                 );
               }
             ),
-          if (showOtherRoutePage.value != null)
+          if (showOtherRoutePageId.value.isNotEmpty)
             errorHelpWidget(
               "Двигайтесь по линии маршрута, при приближении к точке, нажимите на метку, чтобы исследовать её.",
               buttonText: "Закончить",
@@ -281,8 +286,11 @@ class _MapPageState extends State<MapPage> {
               width: 250,
               buttonFunc: () async {
                 setState(()  {
-                  showOtherRoutePage.value!.cancelAllSessions();  
-                  showOtherRoutePage.value = null;
+                  for (var id in showOtherRoutePageId.value) {
+                    routeManager.cancelRoute(id);
+                  }
+                  showOtherRoutePageId.value.clear();
+                  routeManager.routesCollection!.clear();
                 });
                 removePoints();
                 await getMarkerForMap();

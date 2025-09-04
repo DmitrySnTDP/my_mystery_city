@@ -27,7 +27,7 @@ class MarkerOverlay extends StatelessWidget {
       right: 0,
       child: DraggableScrollableSheet(
         expand: false,
-        initialChildSize: marker.isChecked == 1? 0.8: showOtherRoutePage.value == null? 0.5: 0.35,
+        initialChildSize: marker.isChecked == 1? 0.8: showOtherRoutePageId.value.isEmpty? 0.5: 0.35,
         minChildSize: 0.05, 
         maxChildSize: marker.isChecked == 1? 1.0: 0.5,
         builder: (context, scrollController) {
@@ -163,7 +163,7 @@ class MarkerOverlay extends StatelessWidget {
             ],
           ),
         ),
-        if (showOtherRoutePage.value == null)
+        if (showOtherRoutePageId.value.isEmpty)
           Padding(
             padding: EdgeInsets.only(left: 16, right: 16, top: 17, bottom: 0),
             child: TextButton(
@@ -204,7 +204,7 @@ class MarkerOverlay extends StatelessWidget {
             ),
           ]
         ),
-        if (showOtherRoutePage.value == null)
+        if (showOtherRoutePageId.value.isEmpty)
           Padding(
             padding: EdgeInsets.only(left: 16, right: 16, top: 17, bottom: 0),
             child: TextButton(
